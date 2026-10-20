@@ -1,0 +1,377 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/archivo';
+@import 'leaflet/dist/leaflet.css';
+
+/*
+ * ECOTRACK design tokens. See design-system/ecotrack-manager/MASTER.md.
+ * Components consume semantic roles only — never raw hex.
+ *
+ * Surfaces follow a three-tone system:
+ *   night  (#1a1a1a) — the brand frame: header, public heroes, CTA bands, sign-in panel
+ *   canvas (#ffffff) — focused content: public sections, cards, page headers
+ *   muted  (#f9fafb) — alternating public sections and the console workspace
+ *
+ * Green: #48b340 is the brand green. White text on it is 2.7:1, so primary
+ * buttons pair it with near-black text (6.7:1). Green text on white uses
+ * #2e7429 (5.8:1); on night surfaces the brand green itself reads at 6.5:1.
+ */
+
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+:root,
+[data-theme='light'] {
+  color-scheme: light;
+
+  /* Surfaces */
+  --et-canvas: #ffffff;
+  --et-muted: #f9fafb;
+  --et-panel: #ffffff;
+  --et-raised: #ffffff;
+  --et-sunken: #f3f4f6;
+  --et-hover: #f3f5f2;
+  --et-overlay: rgb(17 17 17 / 0.55);
+
+  /* Night: the dark brand frame. Identical in both themes. */
+  --et-night: #1a1a1a;
+  --et-night-2: #242424;
+  --et-night-line: rgb(255 255 255 / 0.12);
+  --et-on-night: #ffffff;
+  --et-on-night-2: #c9ccc6;
+  --et-on-night-3: #9a9e97;
+
+  /* Text */
+  --et-ink: #171717;
+  --et-ink-2: #52554f;
+  --et-ink-3: #6b6f69;
+
+  /* Lines */
+  --et-line: #e7e9e5;
+  --et-line-strong: #d4d7d1;
+
+  /* Green */
+  --et-brand: #48b340;
+  --et-brand-ink: #ffffff;
+  --et-accent: #48b340;
+  --et-accent-hover: #3a9234;
+  --et-accent-ink: #0d1f0b;
+  --et-accent-soft: #edf7eb;
+  --et-accent-tint: #dcefd9;
+  --et-accent-text: #2e7429;
+  --et-focus: #2e7429;
+
+  /* Semantic status: fill (graphics, >= 3:1), text (>= 4.5:1), soft (badge fill) */
+  --et-ok: #3a9234;
+  --et-warn: #c7850b;
+  --et-crit: #d64545;
+  --et-ok-text: #2e7429;
+  --et-warn-text: #8a5300;
+  --et-crit-text: #b42318;
+  --et-ok-soft: #edf7eb;
+  --et-warn-soft: #fdf4e3;
+  --et-crit-soft: #fdeded;
+  --et-info: #2563eb;
+  --et-info-soft: #ebf1fd;
+  --et-maint-text: #52554f;
+  --et-maint-soft: #f0f1ee;
+
+  --et-map-bg: #eef0ec;
+
+  /* Elevation (from the reference's restrained card shadows) */
+  --et-shadow-1: 0 1px 3px 0 rgb(0 0 0 / 0.08), 0 1px 2px -1px rgb(0 0 0 / 0.08);
+  --et-shadow-2: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --et-shadow-3: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+}
+
+/* Optional dark theme: neutral charcoal throughout. */
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  --et-canvas: #121212;
+  --et-muted: #161616;
+  --et-panel: #1c1c1c;
+  --et-raised: #242424;
+  --et-sunken: #141414;
+  --et-hover: #262626;
+  --et-overlay: rgb(0 0 0 / 0.7);
+
+  --et-night: #0c0c0c;
+  --et-night-2: #1a1a1a;
+
+  --et-ink: #f5f5f4;
+  --et-ink-2: #b5b8b2;
+  --et-ink-3: #92968f;
+
+  --et-line: #2c2c2c;
+  --et-line-strong: #3a3a3a;
+
+  --et-accent-soft: rgb(72 179 64 / 0.14);
+  --et-accent-tint: rgb(72 179 64 / 0.24);
+  --et-accent-text: #6cc964;
+  --et-focus: #6cc964;
+
+  --et-ok: #48b340;
+  --et-warn: #e2a83a;
+  --et-crit: #ef6b6b;
+  --et-ok-text: #6cc964;
+  --et-warn-text: #f0c060;
+  --et-crit-text: #f58a8a;
+  --et-ok-soft: rgb(72 179 64 / 0.14);
+  --et-warn-soft: rgb(226 168 58 / 0.14);
+  --et-crit-soft: rgb(239 107 107 / 0.14);
+  --et-info: #6aa9f0;
+  --et-info-soft: rgb(106 169 240 / 0.14);
+  --et-maint-text: #b5b8b2;
+  --et-maint-soft: rgb(181 184 178 / 0.12);
+
+  --et-map-bg: #1a1a1a;
+
+  --et-shadow-1: 0 1px 2px rgb(0 0 0 / 0.5);
+  --et-shadow-2: 0 4px 12px -2px rgb(0 0 0 / 0.55);
+  --et-shadow-3: 0 25px 50px -12px rgb(0 0 0 / 0.75);
+}
+
+/* Inside night surfaces, focus rings and green text use the brand green. */
+.on-night {
+  --et-focus: #48b340;
+  color: var(--et-on-night);
+}
+
+@theme inline {
+  --font-sans: 'Archivo Variable', 'Archivo', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --color-canvas: var(--et-canvas);
+  --color-muted: var(--et-muted);
+  --color-panel: var(--et-panel);
+  --color-raised: var(--et-raised);
+  --color-sunken: var(--et-sunken);
+  --color-hover: var(--et-hover);
+  --color-overlay: var(--et-overlay);
+  --color-night: var(--et-night);
+  --color-night-2: var(--et-night-2);
+  --color-night-line: var(--et-night-line);
+  --color-on-night: var(--et-on-night);
+  --color-on-night-2: var(--et-on-night-2);
+  --color-on-night-3: var(--et-on-night-3);
+  --color-brand: var(--et-brand);
+  --color-brand-ink: var(--et-brand-ink);
+  --color-ink: var(--et-ink);
+  --color-ink-2: var(--et-ink-2);
+  --color-ink-3: var(--et-ink-3);
+  --color-line: var(--et-line);
+  --color-line-strong: var(--et-line-strong);
+  --color-accent: var(--et-accent);
+  --color-accent-hover: var(--et-accent-hover);
+  --color-accent-ink: var(--et-accent-ink);
+  --color-accent-soft: var(--et-accent-soft);
+  --color-accent-tint: var(--et-accent-tint);
+  --color-accent-text: var(--et-accent-text);
+  --color-ok: var(--et-ok);
+  --color-warn: var(--et-warn);
+  --color-crit: var(--et-crit);
+  --color-ok-text: var(--et-ok-text);
+  --color-warn-text: var(--et-warn-text);
+  --color-crit-text: var(--et-crit-text);
+  --color-ok-soft: var(--et-ok-soft);
+  --color-warn-soft: var(--et-warn-soft);
+  --color-crit-soft: var(--et-crit-soft);
+  --color-info: var(--et-info);
+  --color-info-soft: var(--et-info-soft);
+  --color-maint-text: var(--et-maint-text);
+  --color-maint-soft: var(--et-maint-soft);
+
+  --shadow-e1: var(--et-shadow-1);
+  --shadow-e2: var(--et-shadow-2);
+  --shadow-e3: var(--et-shadow-3);
+}
+
+@theme {
+  /*
+   * Type scale. Display and h1 shrink with the viewport; the rest are fixed.
+   *   display 72/72 · h1 48/52 · h2 36/40 · h3 24/32 · title 20/28
+   *   lead 20/30 · body 16/24 · (Tailwind) sm 14/20 · label 12/16
+   */
+  --text-display: clamp(2.5rem, min(3.9vw, 7.4vh), 4.5rem);
+  --text-display--line-height: 1.02;
+  --text-display--font-weight: 700;
+  --text-h1: clamp(2.25rem, 3.6vw, 3rem);
+  --text-h1--line-height: 1.1;
+  --text-h1--font-weight: 700;
+  --text-h2: clamp(1.75rem, 2.6vw, 2.25rem);
+  --text-h2--line-height: 1.15;
+  --text-h2--font-weight: 700;
+  --text-h3: 1.5rem;
+  --text-h3--line-height: 2rem;
+  --text-h3--font-weight: 700;
+  --text-title: 1.25rem;
+  --text-title--line-height: 1.75rem;
+  --text-title--font-weight: 700;
+  --text-lead: clamp(1.0625rem, 1.4vw, 1.25rem);
+  --text-lead--line-height: 1.55;
+  --text-body: 1rem;
+  --text-body--line-height: 1.5rem;
+  --text-label: 0.75rem;
+  --text-label--line-height: 1rem;
+  --text-2xs: 0.75rem;
+  --text-2xs--line-height: 1rem;
+  --text-xs: 0.8125rem;
+  --text-xs--line-height: 1.125rem;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.25rem;
+
+  /* 8px is the standard radius for cards and controls; 4px for badges */
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    @apply bg-canvas text-ink font-sans antialiased;
+  }
+  :focus-visible {
+    outline: 2px solid var(--et-focus);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  ::selection {
+    background: var(--et-accent-soft);
+    color: var(--et-ink);
+  }
+  button,
+  [role='button'],
+  select,
+  summary,
+  label[for] {
+    cursor: pointer;
+  }
+  button:disabled {
+    cursor: not-allowed;
+  }
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--et-line-strong) transparent;
+  }
+  /* Native time picker icon follows the theme */
+  input[type='time']::-webkit-calendar-picker-indicator {
+    filter: var(--et-time-icon, none);
+    opacity: 0.6;
+  }
+  [data-theme='dark'] input[type='time'] {
+    --et-time-icon: invert(0.85);
+  }
+}
+
+@layer utilities {
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+  .break-anywhere {
+    overflow-wrap: anywhere;
+  }
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
+}
+
+/* ---------- Leaflet ---------- */
+.leaflet-container {
+  background: var(--et-map-bg);
+  font-family: var(--font-sans);
+  color: var(--et-ink);
+  outline: none;
+}
+.leaflet-container:focus-visible {
+  outline: 2px solid var(--et-focus);
+  outline-offset: -2px;
+}
+[data-theme='dark'] .leaflet-tile-pane {
+  filter: invert(1) grayscale(1) brightness(0.78) contrast(0.92);
+}
+[data-theme='light'] .leaflet-tile-pane {
+  filter: grayscale(0.55) contrast(0.96) brightness(1.02);
+}
+.leaflet-control-zoom.leaflet-bar {
+  border: 1px solid var(--et-line-strong);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--et-shadow-2);
+}
+.leaflet-control-zoom a {
+  width: 34px !important;
+  height: 34px !important;
+  line-height: 32px !important;
+  background: var(--et-panel) !important;
+  color: var(--et-ink) !important;
+  border-bottom-color: var(--et-line) !important;
+}
+.leaflet-control-zoom a:hover {
+  background: var(--et-hover) !important;
+}
+.leaflet-control-attribution {
+  background: color-mix(in srgb, var(--et-panel) 82%, transparent) !important;
+  color: var(--et-ink-3) !important;
+  font-size: 10px;
+}
+.leaflet-control-attribution a {
+  color: var(--et-ink-2) !important;
+}
+
+/* Collector unit marker: online units carry the accent; offline units are neutral */
+.et-unit {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  background: var(--et-panel);
+  border: 1.5px solid var(--et-line-strong);
+  color: var(--et-ink-3);
+  box-shadow: var(--et-shadow-2);
+}
+.et-unit--online {
+  border-color: var(--et-accent);
+  background: var(--et-accent);
+  color: var(--et-accent-ink);
+}
+.et-unit--selected {
+  box-shadow: 0 0 0 3px var(--et-panel), 0 0 0 5px var(--et-ink), var(--et-shadow-2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media print {
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+}

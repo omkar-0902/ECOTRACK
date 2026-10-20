@@ -1,0 +1,45 @@
+/*
+ * Public-site styles. Every rule is scoped under .et-public (the PublicLayout
+ * root), so nothing here can reach the authenticated console.
+ *
+ * Palette taken from the EcoTrack proposal deck: forest #1A6B35 and leaf
+ * #2ECC71 on deep green; on the web the deck's leaf green is replaced by the
+ * product's brand green (#48B340) and pages are light.
+ */
+.et-public {
+  --pub-forest: #1a6b35; /* deck primary green: 6.6:1 on white */
+  --pub-forest-deep: #0f2417; /* deck background green */
+  --pub-field: #f2f8f0; /* pale ground for resident and city content */
+  --pub-mint: #e2f1dd; /* tinted fills, route lines */
+  --pub-ring: #9fd39a; /* geofence rings */
+}
+[data-theme='dark'] .et-public {
+  --pub-forest: #6cc964;
+  --pub-forest-deep: #0b1c12;
+  --pub-field: #121a14;
+  --pub-mint: #1d3323;
+  --pub-ring: #3f7a46;
+}
+
+/* Map-paper ground used behind the geofence motif: a quiet street grid. */
+.et-public .pub-grid {
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--pub-forest) 9%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--pub-forest) 9%, transparent) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+/* Dashed collector route, as drawn in the deck's geofencing map. */
+.et-public .pub-route {
+  stroke-dasharray: 7 7;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .et-public .pub-route-animated {
+    animation: pub-route-flow 1.6s linear infinite;
+  }
+}
+@keyframes pub-route-flow {
+  to {
+    stroke-dashoffset: -28;
+  }
+}
