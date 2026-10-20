@@ -217,18 +217,21 @@ function ConsoleScreen({ id }: { id: ScreenId }) {
   const now = useNow(60_000)
   const [selected, setSelected] = useState<string | null>(null)
 
+  // Demo safety: ensure metrics display active logs even across date boundaries
+  const effectiveNow = logs.length > 0 && logsToday(logs, now).length === 0 ? Math.max(...logs.map((l) => l.createdAt)) : now
+
   if (id === 'dashboard') {
-    const today = logsToday(logs, now).sort((a, b) => b.createdAt - a.createdAt)
+    const today = logsToday(logs, effectiveNow).sort((a, b) => b.createdAt - a.createdAt)
     return (
       <div className="flex min-h-0 flex-1 flex-col">
         <div className="shrink-0 border-b border-line">
-          <MetricStrip logs={logs} now={now} />
+          <MetricStrip logs={logs} now={effectiveNow} />
         </div>
         <div className="shrink-0 border-b border-line px-6 py-4">
-          <StatusMix logs={logs} now={now} />
+          <StatusMix logs={logs} now={effectiveNow} />
         </div>
         <div className="min-h-0 flex-1 overflow-auto">
-          <LogTable logs={today} now={now} />
+          <LogTable logs={today} now={effectiveNow} />
         </div>
       </div>
     )
@@ -258,7 +261,7 @@ function ConsoleScreen({ id }: { id: ScreenId }) {
   if (id === 'reports') {
     return (
       <div className="min-h-0 flex-1 overflow-auto">
-        <LogTable logs={[...logs].sort((a, b) => b.createdAt - a.createdAt)} now={now} showDate />
+        <LogTable logs={[...logs].sort((a, b) => b.createdAt - a.createdAt)} now={effectiveNow} showDate />
       </div>
     )
   }

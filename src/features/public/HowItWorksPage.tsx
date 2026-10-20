@@ -117,11 +117,11 @@ export default function HowItWorksPage() {
             <Heading id="geofence-title" className="mt-3" title="How the geofence ties the resident to the truck." />
             <ol className="mt-8 flex flex-col gap-4">
               {GEOFENCE_STEPS.map((s, i) => (
-                <li key={s} className="grid grid-cols-[32px_minmax(0,1fr)] gap-4">
+                <li key={s.title} className="grid grid-cols-[32px_minmax(0,1fr)] gap-4">
                   <span className="tabular grid size-8 place-items-center rounded-full border-2 border-[var(--pub-forest)] text-[13px] font-bold text-[var(--pub-forest)]">{i + 1}</span>
                   <div>
-                    <h3 className="text-[17px] font-bold text-ink">{s}</h3>
-                    <p className="mt-0.5 text-[15px] leading-[1.5] text-ink-2">{GEOFENCE_DETAIL[i]}</p>
+                    <h3 className="text-[17px] font-bold text-ink">{s.title}</h3>
+                    <p className="mt-0.5 text-[15px] leading-[1.5] text-ink-2">{s.desc || GEOFENCE_DETAIL[i]}</p>
                   </div>
                 </li>
               ))}

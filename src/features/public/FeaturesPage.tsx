@@ -8,6 +8,7 @@ import { DemoTag } from '@/components/ui/Status'
 import { CollectorTable, LogTable, MetricStrip, StatusMix } from '@/features/views/OpsViews'
 import { cn } from '@/lib/cn'
 import { UnitMap } from '@/features/views/UnitMap'
+import { logsToday } from '@/store/selectors'
 import { REWARDS } from '@/content/original'
 import { usePublicActions } from './PublicLayout'
 import { COLLECTOR_FEATURES, CONSOLE_FEATURES, GEOFENCE_STEPS, RESIDENT_FEATURES } from './site/content'
@@ -101,14 +102,19 @@ export default function FeaturesPage() {
             ))}
           </ul>
         </div>
-        <div className="mt-10 rounded-xl bg-[var(--pub-field)] p-6">
-          <p className="text-[14px] font-bold text-ink">How geofencing works</p>
+        <div className="mt-10 rounded-xl bg-[var(--pub-field)] p-6 border border-line">
+          <p className="text-[14px] font-bold text-ink">Slide 3 · How Geofencing Works (5-Stage Operational Chain)</p>
           <ol className="mt-4 flex flex-col gap-3 md:flex-row md:items-center md:gap-0">
             {GEOFENCE_STEPS.map((s, i) => (
-              <li key={s} className="flex items-center gap-3 md:flex-1">
-                <span className="flex flex-1 items-center gap-3 rounded-lg bg-panel px-4 py-3 text-[14px] font-semibold text-ink shadow-e1">
-                  <span className="tabular grid size-7 shrink-0 place-items-center rounded-full bg-[var(--pub-forest)] text-[12px] font-bold text-white">{i + 1}</span>
-                  {s}
+              <li key={s.title} className="flex items-center gap-3 md:flex-1">
+                <span className="flex flex-1 flex-col rounded-lg bg-panel p-3 text-ink shadow-xs border border-line">
+                  <span className="flex items-center gap-2">
+                    <span className="tabular grid size-6 shrink-0 place-items-center rounded-full bg-[var(--pub-forest)] text-[11px] font-bold text-white">
+                      {i + 1}
+                    </span>
+                    <span className="text-[13px] font-bold">{s.title}</span>
+                  </span>
+                  <span className="mt-1 text-[11px] leading-tight text-ink-3 hidden lg:block">{s.desc}</span>
                 </span>
                 {i < GEOFENCE_STEPS.length - 1 && <ChevronRight aria-hidden className="hidden size-5 shrink-0 text-[var(--pub-forest)] md:mx-1 md:block" />}
               </li>
@@ -186,11 +192,12 @@ function ModuleCard({ feature: f, preview, className }: { feature: (typeof CONSO
 function DashboardPreview() {
   const logs = useData((d) => d.logs)
   const now = useNow(60_000)
+  const effectiveNow = logs.length > 0 && logsToday(logs, now).length === 0 ? Math.max(...logs.map((l) => l.createdAt)) : now
   return (
     <>
-      <MetricStrip logs={logs} now={now} compact />
+      <MetricStrip logs={logs} now={effectiveNow} compact />
       <div className="border-t border-line px-4 py-3">
-        <StatusMix logs={logs} now={now} />
+        <StatusMix logs={logs} now={effectiveNow} />
       </div>
     </>
   )
@@ -208,11 +215,13 @@ function TrackerPreview() {
 function ReportsPreview() {
   const logs = useData((d) => d.logs)
   const now = useNow(60_000)
-  return <LogTable logs={[...logs].sort((a, b) => b.createdAt - a.createdAt).slice(0, 3)} now={now} showDate />
+  const effectiveNow = logs.length > 0 && logsToday(logs, now).length === 0 ? Math.max(...logs.map((l) => l.createdAt)) : now
+  return <LogTable logs={[...logs].sort((a, b) => b.createdAt - a.createdAt).slice(0, 3)} now={effectiveNow} showDate />
 }
 
 function CollectorsPreview() {
   const list = useData((d) => d.collectors)
   return <CollectorTable collectors={list.slice(0, 3)} />
 }
+
 
