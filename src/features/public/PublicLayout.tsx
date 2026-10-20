@@ -99,6 +99,14 @@ export function PublicLayout() {
 
   useEffect(() => {
     window.scrollTo({ top: 0 })
+    const titles: Record<string, string> = {
+      '/overview': 'EcoTrack — Smart Waste Operations Platform',
+      '/features': 'EcoTrack — Platform Features & Capabilities',
+      '/how-it-works': 'EcoTrack — How It Works (Geofencing Chain)',
+      '/preview': 'EcoTrack — Interactive Multi-Role Preview',
+      '/login': 'EcoTrack — Sign In to Command Center',
+    }
+    document.title = titles[pathname] || 'EcoTrack — Smart Waste Operations Platform'
   }, [pathname])
 
   const openSignIn = () => {

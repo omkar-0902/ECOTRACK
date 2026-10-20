@@ -19,7 +19,7 @@ import {
   TEAM_CREDIT,
 } from './site/content'
 import { Band, Container, Eyebrow, Heading, StatusPill } from './site/ui'
-import { ConsoleCard, FinancialImpactWidget, GeofenceMap, ResidentPhone } from './site/visuals'
+import { CitySkylineBackdrop, ConsoleCard, FinancialImpactWidget, GeofenceMap, ResidentPhone } from './site/visuals'
 
 const WHAT_THEY_DO: Record<(typeof AUDIENCES)[number]['id'], string[]> = {
   residents: RESIDENT_FEATURES.map((f) => f.title),
@@ -35,6 +35,7 @@ export default function OverviewPage() {
       {/* Hero: The promise and the three-stakeholder bridge */}
       <section className="relative overflow-hidden border-b border-line bg-canvas">
         <div aria-hidden className="pub-grid absolute inset-y-0 right-0 hidden w-[54%] [mask-image:linear-gradient(to_right,transparent,black_25%)] lg:block" />
+        <CitySkylineBackdrop />
         <Container className="relative grid items-center gap-12 py-12 sm:py-16 lg:min-h-[calc(100dvh-68px)] lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:gap-14 lg:py-16">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2.5">

@@ -462,3 +462,21 @@ export function FinancialImpactWidget({ className }: { className?: string }) {
   )
 }
 
+/** Subtle vector city skyline backdrop inspired by Slide 1's urban sustainability motifs. */
+export function CitySkylineBackdrop({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 1200 160"
+      preserveAspectRatio="none"
+      aria-hidden="true"
+      className={cn('pointer-events-none absolute bottom-0 inset-x-0 w-full h-20 opacity-[0.05] dark:opacity-[0.08] text-[var(--pub-forest)] select-none', className)}
+    >
+      <path
+        fill="currentColor"
+        d="M0,160 L0,120 L40,120 L40,95 L65,95 L65,120 L90,120 L90,70 L115,70 L115,120 L150,120 L150,60 L170,40 L190,60 L190,120 L230,120 L230,85 L260,85 L260,120 L300,120 L300,50 L315,35 L330,50 L330,120 L370,120 L370,75 L405,75 L405,120 L450,120 L450,45 L475,45 L475,120 L510,120 L510,90 L540,90 L540,120 L580,120 L580,30 L595,15 L610,30 L610,120 L650,120 L650,80 L685,80 L685,120 L730,120 L730,55 L755,55 L755,120 L795,120 L795,65 L825,65 L825,120 L870,120 L870,40 L885,25 L900,40 L900,120 L940,120 L940,85 L975,85 L975,120 L1020,120 L1020,60 L1050,60 L1050,120 L1090,120 L1090,75 L1120,75 L1120,120 L1160,120 L1160,95 L1200,95 L1200,160 Z"
+      />
+    </svg>
+  )
+}
+
+
