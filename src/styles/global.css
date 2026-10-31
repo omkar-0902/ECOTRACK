@@ -1,19 +1,29 @@
 @import 'tailwindcss';
-@import '@fontsource-variable/archivo';
+@import '@fontsource-variable/geist';
+@import '@fontsource-variable/geist-mono';
+@import '@fontsource-variable/instrument-sans';
 @import 'leaflet/dist/leaflet.css';
 
 /*
  * ECOTRACK design tokens. See design-system/ecotrack-manager/MASTER.md.
  * Components consume semantic roles only — never raw hex.
  *
- * Surfaces follow a three-tone system:
- *   night  (#1a1a1a) — the brand frame: header, public heroes, CTA bands, sign-in panel
- *   canvas (#ffffff) — focused content: public sections, cards, page headers
- *   muted  (#f9fafb) — alternating public sections and the console workspace
+ * Surfaces are layered, and both themes share the same geometry:
+ *   night  — the brand frame (console top bar, sign-in panel, footer).
+ *            A near-black with a trace of forest green.
+ *   muted  — the page: a warm off-white in light; in dark the same tone as
+ *            canvas, so the app reads as one environment.
+ *   canvas / panel — content surfaces: white in light, one quiet step above
+ *            the page in dark.
+ * Light depth comes from warm tonal steps and soft two-layer shadows; dark
+ * relies on tone and hairlines, with almost no shadow.
  *
- * Green: #48b340 is the brand green. White text on it is 2.7:1, so primary
- * buttons pair it with near-black text (6.7:1). Green text on white uses
- * #2e7429 (5.8:1); on night surfaces the brand green itself reads at 6.5:1.
+ * Green: #43c34b is the brand green. White text on it is too faint, so primary
+ * buttons pair it with near-black text (7.5:1). Green text on white uses
+ * #237a2b (5.4:1); on night surfaces the brand green itself reads at 8.1:1.
+ *
+ * Type: Instrument Sans for headings, Geist for interface text, Geist Mono for
+ * identifiers, times and coordinates.
  */
 
 @custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
@@ -24,49 +34,50 @@
 
   /* Surfaces */
   --et-canvas: #ffffff;
-  --et-muted: #f9fafb;
+  --et-muted: #f6f6f1; /* warm off-white page */
   --et-panel: #ffffff;
   --et-raised: #ffffff;
-  --et-sunken: #f3f4f6;
-  --et-hover: #f3f5f2;
-  --et-overlay: rgb(17 17 17 / 0.55);
+  --et-sunken: #efefe9;
+  --et-hover: #f3f4ee;
+  --et-overlay: rgb(10 15 12 / 0.55);
 
   /* Night: the dark brand frame. Identical in both themes. */
-  --et-night: #1a1a1a;
-  --et-night-2: #242424;
-  --et-night-line: rgb(255 255 255 / 0.12);
-  --et-on-night: #ffffff;
-  --et-on-night-2: #c9ccc6;
-  --et-on-night-3: #9a9e97;
+  --et-night: #0f1411;
+  --et-night-2: #172019;
+  --et-night-3: #1e2a21;
+  --et-night-line: rgb(255 255 255 / 0.09);
+  --et-on-night: #f4f7f4;
+  --et-on-night-2: #b9c4bc;
+  --et-on-night-3: #8b988f;
 
   /* Text */
-  --et-ink: #171717;
-  --et-ink-2: #52554f;
-  --et-ink-3: #6b6f69;
+  --et-ink: #111613;
+  --et-ink-2: #454e48; /* 8.6:1 on the page */
+  --et-ink-3: #5f6862; /* 5.4:1 on the page */
 
-  /* Lines */
-  --et-line: #e7e9e5;
-  --et-line-strong: #d4d7d1;
+  /* Lines: warm hairlines */
+  --et-line: #e7e7df;
+  --et-line-strong: #d3d5cb;
 
   /* Green */
-  --et-brand: #48b340;
-  --et-brand-ink: #ffffff;
-  --et-accent: #48b340;
-  --et-accent-hover: #3a9234;
-  --et-accent-ink: #0d1f0b;
-  --et-accent-soft: #edf7eb;
-  --et-accent-tint: #dcefd9;
-  --et-accent-text: #2e7429;
-  --et-focus: #2e7429;
+  --et-brand: #43c34b;
+  --et-brand-ink: #0b1f0d;
+  --et-accent: #43c34b;
+  --et-accent-hover: #37ad3f;
+  --et-accent-ink: #0b1f0d;
+  --et-accent-soft: #ebf7ec;
+  --et-accent-tint: #d5efd7;
+  --et-accent-text: #237a2b;
+  --et-focus: #237a2b;
 
   /* Semantic status: fill (graphics, >= 3:1), text (>= 4.5:1), soft (badge fill) */
-  --et-ok: #3a9234;
+  --et-ok: #2f9e38;
   --et-warn: #c7850b;
   --et-crit: #d64545;
-  --et-ok-text: #2e7429;
+  --et-ok-text: #237a2b;
   --et-warn-text: #8a5300;
   --et-crit-text: #b42318;
-  --et-ok-soft: #edf7eb;
+  --et-ok-soft: #ebf7ec;
   --et-warn-soft: #fdf4e3;
   --et-crit-soft: #fdeded;
   --et-info: #2563eb;
@@ -74,70 +85,76 @@
   --et-maint-text: #52554f;
   --et-maint-soft: #f0f1ee;
 
-  --et-map-bg: #eef0ec;
+  --et-map-bg: #eef2ee;
 
-  /* Elevation (from the reference's restrained card shadows) */
-  --et-shadow-1: 0 1px 3px 0 rgb(0 0 0 / 0.08), 0 1px 2px -1px rgb(0 0 0 / 0.08);
-  --et-shadow-2: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --et-shadow-3: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  /* Elevation: a tight contact shadow plus a soft ambient one, tinted green-black */
+  --et-shadow-1: 0 1px 2px rgb(20 32 22 / 0.04), 0 2px 8px -2px rgb(20 32 22 / 0.06);
+  --et-shadow-2: 0 1px 3px rgb(20 32 22 / 0.05), 0 12px 28px -10px rgb(20 32 22 / 0.16);
+  --et-shadow-3: 0 4px 12px rgb(20 32 22 / 0.06), 0 32px 64px -24px rgb(20 32 22 / 0.32);
 }
 
-/* Optional dark theme: neutral charcoal throughout. */
+/* Dark theme: near-black with a forest undertone, not neutral grey. */
 [data-theme='dark'] {
   color-scheme: dark;
 
-  --et-canvas: #121212;
-  --et-muted: #161616;
-  --et-panel: #1c1c1c;
-  --et-raised: #242424;
-  --et-sunken: #141414;
-  --et-hover: #262626;
-  --et-overlay: rgb(0 0 0 / 0.7);
+  /* One environment: page, canvas and frame are near-identical; panels sit one quiet step up */
+  --et-canvas: #0b100d;
+  --et-muted: #0b100d;
+  --et-panel: #0f1511;
+  --et-raised: #151d18;
+  --et-sunken: #0d130f;
+  --et-hover: #161f19;
+  --et-overlay: rgb(0 0 0 / 0.72);
 
-  --et-night: #0c0c0c;
-  --et-night-2: #1a1a1a;
+  --et-night: #090d0a;
+  --et-night-2: #111813;
+  --et-night-3: #18211b;
+  --et-night-line: rgb(255 255 255 / 0.06);
 
-  --et-ink: #f5f5f4;
-  --et-ink-2: #b5b8b2;
-  --et-ink-3: #92968f;
+  --et-ink: #eef3ef;
+  --et-ink-2: #aebab1;
+  --et-ink-3: #869489;
 
-  --et-line: #2c2c2c;
-  --et-line-strong: #3a3a3a;
+  --et-line: #19221c; /* hairlines: present, not outlines */
+  --et-line-strong: #2a362d; /* controls stay recognisable */
 
-  --et-accent-soft: rgb(72 179 64 / 0.14);
-  --et-accent-tint: rgb(72 179 64 / 0.24);
-  --et-accent-text: #6cc964;
-  --et-focus: #6cc964;
+  --et-accent-soft: rgb(67 195 75 / 0.14);
+  --et-accent-tint: rgb(67 195 75 / 0.26);
+  --et-accent-text: #6fd476;
+  --et-focus: #6fd476;
 
-  --et-ok: #48b340;
+  --et-ok: #43c34b;
   --et-warn: #e2a83a;
   --et-crit: #ef6b6b;
-  --et-ok-text: #6cc964;
+  --et-ok-text: #6fd476;
   --et-warn-text: #f0c060;
   --et-crit-text: #f58a8a;
-  --et-ok-soft: rgb(72 179 64 / 0.14);
+  --et-ok-soft: rgb(67 195 75 / 0.14);
   --et-warn-soft: rgb(226 168 58 / 0.14);
   --et-crit-soft: rgb(239 107 107 / 0.14);
   --et-info: #6aa9f0;
   --et-info-soft: rgb(106 169 240 / 0.14);
-  --et-maint-text: #b5b8b2;
-  --et-maint-soft: rgb(181 184 178 / 0.12);
+  --et-maint-text: #aebab1;
+  --et-maint-soft: rgb(174 186 177 / 0.1);
 
-  --et-map-bg: #1a1a1a;
+  --et-map-bg: #121915;
 
-  --et-shadow-1: 0 1px 2px rgb(0 0 0 / 0.5);
-  --et-shadow-2: 0 4px 12px -2px rgb(0 0 0 / 0.55);
-  --et-shadow-3: 0 25px 50px -12px rgb(0 0 0 / 0.75);
+  /* Panels don't float in dark; only popovers and dialogs carry elevation */
+  --et-shadow-1: 0 0 #0000;
+  --et-shadow-2: 0 12px 32px -12px rgb(0 0 0 / 0.7);
+  --et-shadow-3: 0 30px 60px -16px rgb(0 0 0 / 0.8);
 }
 
 /* Inside night surfaces, focus rings and green text use the brand green. */
 .on-night {
-  --et-focus: #48b340;
+  --et-focus: #43c34b;
   color: var(--et-on-night);
 }
 
 @theme inline {
-  --font-sans: 'Archivo Variable', 'Archivo', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-sans: 'Geist Variable', 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Instrument Sans Variable', 'Instrument Sans', 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Geist Mono Variable', 'Geist Mono', ui-monospace, 'SFMono-Regular', Consolas, monospace;
 
   --color-canvas: var(--et-canvas);
   --color-muted: var(--et-muted);
@@ -148,6 +165,7 @@
   --color-overlay: var(--et-overlay);
   --color-night: var(--et-night);
   --color-night-2: var(--et-night-2);
+  --color-night-3: var(--et-night-3);
   --color-night-line: var(--et-night-line);
   --color-on-night: var(--et-on-night);
   --color-on-night-2: var(--et-on-night-2);
@@ -235,6 +253,15 @@
   }
   body {
     @apply bg-canvas text-ink font-sans antialiased;
+    font-feature-settings: 'ss01', 'cv11';
+  }
+  /* Headings use the display face; everything else inherits Geist. */
+  h1,
+  h2,
+  h3,
+  .font-display {
+    font-family: var(--font-display);
+    font-optical-sizing: auto;
   }
   :focus-visible {
     outline: 2px solid var(--et-focus);
@@ -269,13 +296,9 @@
     scrollbar-width: thin;
     scrollbar-color: var(--et-line-strong) transparent;
   }
-  /* Native time picker icon follows the theme */
+  /* The native time-picker icon already follows color-scheme; only soften it. */
   input[type='time']::-webkit-calendar-picker-indicator {
-    filter: var(--et-time-icon, none);
-    opacity: 0.6;
-  }
-  [data-theme='dark'] input[type='time'] {
-    --et-time-icon: invert(0.85);
+    opacity: 0.7;
   }
 }
 
@@ -283,12 +306,169 @@
   .tabular {
     font-variant-numeric: tabular-nums;
   }
+  /* Identifiers, times and coordinates */
+  .data-mono {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+  }
   .break-anywhere {
     overflow-wrap: anywhere;
   }
   .scrollbar-none {
     scrollbar-width: none;
   }
+}
+
+/* Live indicator: one soft ring that fades out, every 2.4 s. Off with reduced motion. */
+@keyframes et-ping {
+  0% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  70%,
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+.et-ping {
+  animation: et-ping 2.4s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .et-ping {
+    display: none;
+  }
+}
+
+/*
+ * Under-construction illustrations (ConstructionArt.tsx). The resting style is
+ * the finished drawing; the animations only play when motion is allowed.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .et-draw {
+    stroke-dasharray: 1;
+    animation: et-draw 6s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+  }
+  .et-node-1 {
+    animation: et-node-1 6s ease-out infinite;
+  }
+  .et-node-2 {
+    animation: et-node-2 6s ease-out infinite;
+  }
+  .et-node-3 {
+    animation: et-node-3 6s ease-out infinite;
+  }
+  .et-spin-slow {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: et-spin 14s linear infinite;
+  }
+  .et-rise {
+    transform-box: fill-box;
+    transform-origin: 50% 100%;
+    animation: et-rise 3.6s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate;
+  }
+  .et-sweep {
+    animation: et-sweep 5.2s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .et-sweep {
+    display: none;
+  }
+}
+@keyframes et-draw {
+  0% {
+    stroke-dashoffset: 1;
+    opacity: 1;
+  }
+  55%,
+  88% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+}
+@keyframes et-node-1 {
+  0% {
+    opacity: 0;
+  }
+  4%,
+  88% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes et-node-2 {
+  0%,
+  19% {
+    opacity: 0;
+  }
+  24%,
+  88% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes et-node-3 {
+  0%,
+  35% {
+    opacity: 0;
+  }
+  40%,
+  88% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes et-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes et-rise {
+  from {
+    transform: scaleY(0.3);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+@keyframes et-sweep {
+  0% {
+    transform: translateX(0);
+    opacity: 0;
+  }
+  12%,
+  85% {
+    opacity: 0.7;
+  }
+  100% {
+    transform: translateX(200px);
+    opacity: 0;
+  }
+}
+
+/* Console page: the warm page tone with a faint green light under the top bar */
+.et-workspace {
+  background:
+    radial-gradient(ellipse 70% 280px at 50% 0, rgb(67 195 75 / 0.055), transparent 100%),
+    var(--et-muted);
+}
+[data-theme='dark'] .et-workspace {
+  background:
+    radial-gradient(ellipse 70% 280px at 50% 0, rgb(67 195 75 / 0.035), transparent 100%),
+    var(--et-muted);
 }
 
 /* ---------- Leaflet ---------- */

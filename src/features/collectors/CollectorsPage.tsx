@@ -1,10 +1,10 @@
 import { useMemo, useState, type FormEvent } from 'react'
 import { useSearchParams } from 'react-router'
-import { Map, Phone, Plus, SearchX, User, Users, X } from 'lucide-react'
+import { Map, MousePointerClick, Phone, Plus, SearchX, User, Users, X } from 'lucide-react'
 import { ButtonLink } from '@/components/ui/ButtonLink'
 import { useAppStore, useData } from '@/store/StoreProvider'
 import { addCollector } from '@/store/commands'
-import { EmptyState, Page, Panel } from '@/components/layout/PageHeader'
+import { EmptyState, Page, Panel, PanelHeader } from '@/components/layout/PageHeader'
 import { Button, IconButton } from '@/components/ui/Button'
 import { Dialog } from '@/components/ui/Dialog'
 import { Avatar } from '@/components/ui/Avatar'
@@ -14,6 +14,7 @@ import { useToast } from '@/components/feedback/Toaster'
 import { CollectorTable } from '@/features/views/OpsViews'
 import { COLLECTORS } from '@/content/original'
 import type { Collector } from '@/types/domain'
+import { cn } from '@/lib/cn'
 
 const dateFmt = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 
@@ -49,9 +50,9 @@ export default function CollectorsPage() {
         </Button>
       }
     >
-      <div className="grid gap-5 lg:min-h-0 lg:flex-1 lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-6">
+      <div className="grid gap-4 lg:min-h-0 lg:flex-1 lg:grid-cols-[minmax(0,1fr)_320px] 2xl:grid-cols-[minmax(0,1fr)_360px]">
         <Panel label="Collector roster" fill>
-          <div className="flex shrink-0 flex-wrap items-center gap-3 border-b border-line p-4">
+          <div className="flex shrink-0 flex-wrap items-center gap-2.5 border-b border-line p-3">
             <SearchInput label="Search collectors" value={search} onChange={setSearch} placeholder="Search name, ECO-ID or phone" className="w-full sm:w-72" />
             <SelectField
               label="Status"
@@ -90,7 +91,13 @@ export default function CollectorsPage() {
         </Panel>
 
         <Panel label="Collector details" className="lg:min-h-0">
-          {selected ? <CollectorDetail collector={selected} onClose={() => setParam('collector', null)} /> : <EmptyState icon={<User aria-hidden className="size-5" />} title="No collector selected" body="Select a collector in the roster to see their details." />}
+          {selected ? (
+            <CollectorDetail collector={selected} onClose={() => setParam('collector', null)} />
+          ) : collectors.length > 0 ? (
+            <RosterOverview collectors={collectors} />
+          ) : (
+            <EmptyState icon={<User aria-hidden className="size-5" />} title="No collector selected" body="Select a collector in the roster to see their details." />
+          )}
         </Panel>
       </div>
 
@@ -113,11 +120,11 @@ export default function CollectorsPage() {
 function CollectorDetail({ collector: c, onClose }: { collector: Collector; onClose: () => void }) {
   return (
     <div className="flex flex-col">
-      <div className="flex items-start gap-3 border-b border-line bg-muted p-5">
+      <div className="flex items-start gap-3 border-b border-line bg-muted p-4">
         <Avatar name={c.name} />
         <div className="min-w-0 flex-1">
-          <p className="truncate text-[18px] font-bold text-ink">{c.name}</p>
-          <p className="text-[13px] text-ink-3">{c.id}</p>
+          <p className="truncate text-[17px] font-bold text-ink">{c.name}</p>
+          <p className="data-mono text-[12.5px] text-ink-3">{c.id}</p>
         </div>
         <IconButton label="Close details" size="sm" onClick={onClose}>
           <X aria-hidden className="size-4" />
@@ -133,10 +140,10 @@ function CollectorDetail({ collector: c, onClose }: { collector: Collector; onCl
           </a>
         </Detail>
         <Detail label="Registered">{dateFmt.format(c.registeredAt)}</Detail>
-        <Detail label="Last reported position">{c.position ? <span className="tabular text-[12.5px]">{`${c.position.lat.toFixed(4)}, ${c.position.lng.toFixed(4)}`}</span> : 'None reported'}</Detail>
+        <Detail label="Last reported position">{c.position ? <span className="data-mono text-[12.5px]">{`${c.position.lat.toFixed(4)}, ${c.position.lng.toFixed(4)}`}</span> : 'None reported'}</Detail>
       </dl>
       {c.position && (
-        <div className="p-5 pt-3">
+        <div className="p-4 pt-3">
           <ButtonLink to={`/tracking?unit=${encodeURIComponent(c.id)}`} variant="outline" className="w-full" icon={<Map aria-hidden className="size-4" />}>
             Show on Live Tracker
           </ButtonLink>
@@ -146,9 +153,45 @@ function CollectorDetail({ collector: c, onClose }: { collector: Collector; onCl
   )
 }
 
+/** Shown in the side panel until a collector is selected: roster counts from the records. */
+function RosterOverview({ collectors }: { collectors: Collector[] }) {
+  const online = collectors.filter((c) => c.online).length
+  const located = collectors.filter((c) => c.position).length
+  const latest = collectors.reduce((a, b) => (b.registeredAt > a.registeredAt ? b : a))
+  const counts = [
+    { label: 'Registered', value: collectors.length },
+    { label: 'Online', value: online },
+    { label: 'Offline', value: collectors.length - online },
+    { label: 'Reporting a position', value: located },
+  ]
+  return (
+    <div className="flex flex-col">
+      <PanelHeader title="Roster overview" />
+      <dl className="grid grid-cols-2 border-b border-line">
+        {counts.map((k, i) => (
+          <div key={k.label} className={cn('px-5 py-3', i % 2 === 1 && 'border-l border-line', i >= 2 && 'border-t border-line')}>
+            <dt className="text-[12.5px] text-ink-3">{k.label}</dt>
+            <dd className="tabular mt-1 text-[22px] font-bold leading-none text-ink">{k.value}</dd>
+          </div>
+        ))}
+      </dl>
+      <dl className="divide-y divide-line px-5">
+        <Detail label="Latest registration">
+          <span className="font-medium">{latest.name}</span>
+          <span className="block text-[12.5px] text-ink-3">{dateFmt.format(latest.registeredAt)}</span>
+        </Detail>
+      </dl>
+      <p className="m-4 mt-1 flex items-start gap-2.5 rounded-lg bg-muted px-3.5 py-3 text-[13px] leading-5 text-ink-2">
+        <MousePointerClick aria-hidden className="mt-0.5 size-4 shrink-0 text-ink-3" />
+        Select a collector in the roster to see their contact details and last reported position.
+      </p>
+    </div>
+  )
+}
+
 function Detail({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="flex items-center justify-between gap-4 py-3.5 text-[14px]">
+    <div className="flex items-center justify-between gap-4 py-3 text-[14px]">
       <dt className="text-ink-3">{label}</dt>
       <dd className="text-right text-ink">{children}</dd>
     </div>

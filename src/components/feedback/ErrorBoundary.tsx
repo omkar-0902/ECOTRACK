@@ -28,8 +28,10 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    // Surface for developers; the UI shows a recovery path instead of crashing.
-    console.error(`[EcoTrack] ${this.props.area} failed`, error, info.componentStack)
+    // Full details only in development; production consoles get a one-line note
+    // and the UI shows a recovery path without any internals.
+    if (import.meta.env.DEV) console.error(`[EcoTrack] ${this.props.area} failed`, error, info.componentStack)
+    else console.error(`[EcoTrack] ${this.props.area} failed to render`)
   }
 
   render() {

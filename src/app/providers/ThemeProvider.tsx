@@ -42,7 +42,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   if (document.documentElement.dataset.theme !== resolved) document.documentElement.dataset.theme = resolved
 
   useEffect(() => {
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', resolved === 'dark' ? '#121212' : '#ffffff')
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', resolved === 'dark' ? '#0c110e' : '#ffffff')
   }, [resolved])
 
   const setPreference = useCallback((p: ThemePreference) => {

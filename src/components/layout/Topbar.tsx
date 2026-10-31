@@ -9,6 +9,7 @@ import { IconButton } from '@/components/ui/Button'
 import { DemoTag } from '@/components/ui/Status'
 import { Brand } from '@/components/layout/Brand'
 import { NAV } from '@/components/navigation/navConfig'
+import { ShiftMenu } from '@/features/shift/Shift'
 import { cn } from '@/lib/cn'
 
 function ProfileMenu() {
@@ -61,10 +62,11 @@ export function Topbar({ onOpenNav }: { onOpenNav: () => void }) {
           </IconButton>
         </span>
         <Link to="/dashboard" aria-label="EcoTrack dashboard" className="shrink-0">
-          <span className="sm:hidden">
+          {/* The mark alone on phones and at 1024–1279 px, where the module nav needs the width */}
+          <span className="sm:hidden lg:inline xl:hidden">
             <Brand compact />
           </span>
-          <span className="hidden sm:inline">
+          <span className="hidden sm:inline lg:hidden xl:inline">
             <Brand tone="night" />
           </span>
         </Link>
@@ -81,7 +83,7 @@ export function Topbar({ onOpenNav }: { onOpenNav: () => void }) {
                 >
                   {({ isActive }) => (
                     <>
-                      <item.icon aria-hidden strokeWidth={1.75} className={cn('hidden size-[18px] xl:block', isActive ? 'text-brand' : 'text-on-night-3')} />
+                      <item.icon aria-hidden strokeWidth={1.75} className={cn('hidden size-[18px] 2xl:block', isActive ? 'text-brand' : 'text-on-night-3')} />
                       {item.label}
                       {isActive && <span aria-hidden className="absolute inset-x-3 bottom-0 h-[3px] rounded-t-full bg-brand" />}
                     </>
@@ -93,7 +95,10 @@ export function Topbar({ onOpenNav }: { onOpenNav: () => void }) {
         </nav>
 
         <div className="ml-auto flex items-center gap-1.5">
-          <span className="hidden md:block lg:hidden xl:block">
+          <span className="mr-1">
+            <ShiftMenu />
+          </span>
+          <span className="hidden md:block lg:hidden min-[1600px]:block">
             <DemoTag tone="night" />
           </span>
           <IconButton variant="night" label={resolved === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'} onClick={() => setPreference(resolved === 'dark' ? 'light' : 'dark')}>

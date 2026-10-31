@@ -43,8 +43,8 @@ function Lazy({ children }: { children: React.ReactNode }) {
 }
 
 /**
- * Public site: four independent routes (/ redirects to /overview). /login renders
- * Overview with the sign-in dialog open. Console routes are unchanged.
+ * Public site: four independent routes (/ redirects to /overview). /login and
+ * /signup render Overview with the sign-in or create-account dialog open. Console routes are unchanged.
  */
 export const router = createBrowserRouter([
   { path: '/', element: <Navigate to="/overview" replace /> },
@@ -53,6 +53,7 @@ export const router = createBrowserRouter([
     children: [
       { path: '/overview', Component: OverviewPage },
       { path: '/login', Component: OverviewPage },
+      { path: '/signup', Component: OverviewPage },
       { path: '/features', element: <Lazy><FeaturesPage /></Lazy> },
       { path: '/how-it-works', element: <Lazy><HowItWorksPage /></Lazy> },
       { path: '/preview', element: <Lazy><PreviewPage /></Lazy> },

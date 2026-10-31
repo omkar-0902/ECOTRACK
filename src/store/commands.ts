@@ -1,4 +1,5 @@
 import type { Collector, ShiftTiming } from '@/types/domain'
+import { shiftProblem } from '@/lib/shift'
 import type { AppData, CommandOutcome } from './types'
 
 const ok = <T>(data: AppData, value: T): CommandOutcome<T> => ({ ok: true, data, value })
@@ -28,11 +29,11 @@ export function addCollector(data: AppData, input: { name: string; phone: string
   return ok({ ...data, collectors: [collector, ...data.collectors] }, collector)
 }
 
-const TIME = /^([01]\d|2[0-3]):[0-5]\d$/
-
+/** Both times "HH:MM" and different; an end before the start is an overnight shift. */
 export function setShiftTiming(data: AppData, shift: ShiftTiming): CommandOutcome<void> {
-  if (!TIME.test(shift.start) || !TIME.test(shift.end)) return fail('Enter both times as hours and minutes.')
-  if (shift.start === shift.end) return fail('Deployment start and operations cease must be different times.')
+  const problem = shiftProblem(shift)
+  if (problem === 'format') return fail('Enter both times as hours and minutes.')
+  if (problem === 'same') return fail('Deployment start and operations cease must be different times.')
   return ok({ ...data, shift: { ...shift } }, undefined)
 }
 

@@ -1,27 +1,171 @@
 /*
- * Public-site styles. Every rule is scoped under .et-public (the PublicLayout
- * root), so nothing here can reach the authenticated console.
+ * Public-site brand layer. Every rule is scoped under .et-public (the
+ * PublicLayout root), so nothing here can reach the authenticated console.
  *
- * Palette taken from the EcoTrack proposal deck: forest #1A6B35 and leaf
- * #2ECC71 on deep green; on the web the deck's leaf green is replaced by the
- * product's brand green (#48B340) and pages are light.
+ * Identity: the charcoal and green the console already uses, with a deep
+ * forest green for depth and a warm white for reading.
  */
 .et-public {
-  --pub-forest: #1a6b35; /* deck primary green: 6.6:1 on white */
-  --pub-forest-deep: #0f2417; /* deck background green */
-  --pub-field: #f2f8f0; /* pale ground for resident and city content */
-  --pub-mint: #e2f1dd; /* tinted fills, route lines */
-  --pub-ring: #9fd39a; /* geofence rings */
+  --pub-charcoal: var(--et-night); /* the shared brand frame, same as the console */
+  --pub-charcoal-2: var(--et-night-2);
+  --pub-forest: #1a6b35; /* text-safe forest green: 6.6:1 on white */
+  --pub-forest-deep: #0d2a1b;
+  --pub-leaf: #43c34b; /* brand green: accents and marks only */
+  --pub-leaf-text: #73d679; /* green text on the night frame: 10.3:1 */
+  --pub-warm: #f6f6f1; /* warm off-white: the page tone between white bands */
+  --pub-field: #edf4ea; /* restrained forest tint */
+  --pub-mint: #e0f2df;
+  --pub-ring: #9fd39a;
+  --pub-on-dark: var(--et-on-night);
+  --pub-on-dark-2: var(--et-on-night-2);
+  --pub-on-dark-3: var(--et-on-night-3);
+  --pub-dark-line: var(--et-night-line);
+  /* Illustration surfaces: light paper in light theme, deep panels in dark */
+  --pub-paper: #ffffff;
+  --pub-paper-ink: #3c4a40;
+  --pub-shade: #eceeea;
+  --pub-shade-ink: #5d6660;
+  --pub-road: #d9ddd6;
+  --pub-unknown: #c9cec8;
+  /* Translucent panels, controls and product-shot framing inside the bands */
+  --pub-glass: rgb(255 255 255 / 0.05);
+  --pub-glass-line: rgb(255 255 255 / 0.15);
+  --pub-glass-line-hover: rgb(255 255 255 / 0.3);
+  --pub-err: #f58a8a;
+  --pub-shot-line: rgb(255 255 255 / 0.1);
+  --pub-shot-shadow: 0 40px 80px -20px rgb(0 0 0 / 0.6);
 }
 [data-theme='dark'] .et-public {
-  --pub-forest: #6cc964;
-  --pub-forest-deep: #0b1c12;
-  --pub-field: #121a14;
-  --pub-mint: #1d3323;
+  /* Sections share the page tone; spacing and type separate them, not boxes */
+  --pub-charcoal: #090d0a;
+  --pub-forest: #6fd476;
+  --pub-warm: #0b100d;
+  --pub-field: #0c120e;
+  --pub-mint: #15251a;
   --pub-ring: #3f7a46;
+  --pub-paper: #121a15;
+  --pub-paper-ink: #c9d4cc;
+  --pub-shade: #0f1511;
+  --pub-shade-ink: #9aa89e;
+  --pub-road: #1c261f;
+  --pub-unknown: #4a564d;
+  --pub-dark-line: rgb(255 255 255 / 0.06);
+  --pub-shot-line: rgb(255 255 255 / 0.07);
+  --pub-shot-shadow: 0 40px 80px -30px rgb(0 0 0 / 0.7);
 }
 
-/* Map-paper ground used behind the geofence motif: a quiet street grid. */
+.et-public .pub-dark,
+.et-public .pub-hero,
+.et-public .pub-chrome {
+  color: var(--pub-on-dark);
+  --et-focus: var(--pub-leaf);
+}
+
+/* Site header: night in dark, a warm frosted bar in light (see below). */
+.et-public .pub-chrome {
+  background-color: var(--pub-charcoal);
+  --pub-chrome-hover: rgb(255 255 255 / 0.08);
+  --night-hover: rgb(255 255 255 / 0.08);
+}
+
+/* Night stage: always dark. The product stage on Overview and the footer
+   anchor read as night in both themes. */
+.et-public .pub-night {
+  background-color: var(--pub-charcoal);
+  background-image:
+    radial-gradient(ellipse 60% 70% at 85% 0%, rgb(26 107 53 / 0.34), transparent 70%),
+    radial-gradient(ellipse 40% 50% at 0% 100%, rgb(13 42 27 / 0.55), transparent 70%);
+  color: var(--pub-on-dark);
+  --et-focus: var(--pub-leaf);
+}
+
+/* Dark theme: bands sit on the page tone; only a faint forest light marks them. */
+[data-theme='dark'] .et-public :is(.pub-dark, .pub-hero) {
+  --pub-charcoal: var(--et-canvas);
+}
+[data-theme='dark'] .et-public .pub-dark {
+  background-color: var(--et-canvas);
+  background-image: radial-gradient(ellipse 55% 80% at 85% 0%, rgb(26 107 53 / 0.16), transparent 70%);
+}
+[data-theme='dark'] .et-public .pub-hero {
+  background-color: var(--et-canvas);
+  background-image:
+    radial-gradient(ellipse 48% 62% at 74% 52%, rgb(26 107 53 / 0.3), transparent 72%),
+    radial-gradient(ellipse 30% 40% at 96% 0%, rgb(72 179 64 / 0.08), transparent 70%);
+}
+[data-theme='dark'] .et-public .pub-night {
+  background-color: #0e1410;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.05);
+}
+
+/*
+ * Light theme (the default): hero, content bands and the header are warm
+ * white with a soft green light; the footer keeps the night frame. Their
+ * text variables are remapped to ink so the same markup serves both themes.
+ */
+[data-theme='light'] .et-public :is(.pub-dark, .pub-hero, .pub-chrome) {
+  --pub-charcoal: #ffffff;
+  --pub-on-dark: var(--et-ink);
+  --pub-on-dark-2: var(--et-ink-2);
+  --pub-on-dark-3: var(--et-ink-3);
+  --pub-leaf-text: var(--et-accent-text);
+  --pub-dark-line: var(--et-line);
+  --et-on-night: var(--et-ink);
+  --et-on-night-2: var(--et-ink-2);
+  --et-on-night-3: var(--et-ink-3);
+  --et-brand: var(--et-accent-text);
+  --et-focus: var(--et-accent-text);
+  --pub-glass: #ffffff;
+  --pub-glass-line: var(--et-line-strong);
+  --pub-glass-line-hover: var(--et-ink-3);
+  --pub-err: var(--et-crit-text);
+  --pub-shot-line: var(--et-line);
+  --pub-shot-shadow: var(--et-shadow-3);
+  --btn-light-line: var(--et-line-strong);
+  --btn-light-line-hover: var(--et-ink-3);
+  --btn-light-hover: var(--et-hover);
+  --pub-chrome-hover: var(--et-hover);
+  --night-hover: var(--et-hover);
+  --pub-street-a: rgb(15 32 20 / 0.055);
+  --pub-street-b: rgb(15 32 20 / 0.03);
+}
+[data-theme='light'] .et-public .pub-chrome {
+  background-color: rgb(251 251 248 / 0.86);
+  backdrop-filter: saturate(1.4) blur(14px);
+}
+[data-theme='light'] .et-public .pub-chrome.pub-sheet {
+  background-color: #fbfbf8;
+  backdrop-filter: none;
+}
+[data-theme='light'] .et-public .pub-dark {
+  background-color: #ffffff;
+  background-image:
+    radial-gradient(ellipse 55% 75% at 88% 0%, rgb(67 195 75 / 0.09), transparent 70%),
+    radial-gradient(ellipse 40% 55% at 0% 100%, rgb(67 195 75 / 0.05), transparent 70%);
+}
+[data-theme='light'] .et-public .pub-hero {
+  background-color: #fbfbf8;
+  background-image:
+    radial-gradient(ellipse 50% 64% at 74% 50%, rgb(67 195 75 / 0.13), transparent 72%),
+    radial-gradient(ellipse 30% 40% at 100% 0%, rgb(67 195 75 / 0.09), transparent 70%),
+    linear-gradient(to bottom, #ffffff, var(--pub-warm));
+}
+
+/* Urban street grid: blocks and two arterial roads, drawn very faintly. */
+.et-public .pub-streets {
+  background-image:
+    linear-gradient(var(--pub-street-a, rgb(255 255 255 / 0.045)) 1px, transparent 1px),
+    linear-gradient(90deg, var(--pub-street-a, rgb(255 255 255 / 0.045)) 1px, transparent 1px),
+    linear-gradient(var(--pub-street-b, rgb(255 255 255 / 0.03)) 1px, transparent 1px),
+    linear-gradient(90deg, var(--pub-street-b, rgb(255 255 255 / 0.03)) 1px, transparent 1px);
+  background-size:
+    240px 240px,
+    240px 240px,
+    60px 60px,
+    60px 60px;
+}
+
+/* Light map-paper grid used behind the geofence concept. */
 .et-public .pub-grid {
   background-image:
     linear-gradient(color-mix(in srgb, var(--pub-forest) 9%, transparent) 1px, transparent 1px),
@@ -29,7 +173,7 @@
   background-size: 48px 48px;
 }
 
-/* Dashed collector route, as drawn in the deck's geofencing map. */
+/* Dashed collector route. */
 .et-public .pub-route {
   stroke-dasharray: 7 7;
 }

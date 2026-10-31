@@ -4,64 +4,79 @@ import { CircleDashed, CircleCheck } from 'lucide-react'
 import { cn } from '@/lib/cn'
 import type { Status } from './content'
 
+/**
+ * The public page column. On desktop the gutters are 4% of the viewport, so the
+ * content uses about 92% of the width, capped at 1760px on very wide screens.
+ */
 export function Container({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cn('mx-auto w-full max-w-[1240px] px-4 sm:px-6 lg:px-8', className)}>{children}</div>
+  return <div className={cn('mx-auto w-full max-w-[1760px] px-5 sm:px-8 lg:px-[4vw]', className)}>{children}</div>
 }
 
-export function Eyebrow({ children, className }: { children: ReactNode; className?: string }) {
-  return <p className={cn('text-[13px] font-semibold uppercase tracking-[0.12em] text-[var(--pub-forest)]', className)}>{children}</p>
+/** Short label above a heading: sentence case, with a brand-green rule. */
+export function Eyebrow({ children, className, dark }: { children: ReactNode; className?: string; dark?: boolean }) {
+  return (
+    <p className={cn('inline-flex items-center gap-2.5 text-[14px] font-semibold', dark ? 'text-[var(--pub-leaf-text)]' : 'text-[var(--pub-forest)]', className)}>
+      <span aria-hidden className="h-0.5 w-6 rounded-full bg-[var(--pub-leaf)]" />
+      {children}
+    </p>
+  )
 }
 
 const TONE = {
   white: 'bg-canvas',
+  warm: 'bg-[var(--pub-warm)]',
   field: 'bg-[var(--pub-field)]',
-  muted: 'bg-muted',
+  dark: 'pub-dark',
 } as const
 
 export function Band({ tone = 'white', children, className, labelledBy, id }: { tone?: keyof typeof TONE; children: ReactNode; className?: string; labelledBy?: string; id?: string }) {
   return (
-    <section id={id} aria-labelledby={labelledBy} className={cn('py-16 sm:py-20 lg:py-24', TONE[tone], className)}>
+    <section id={id} aria-labelledby={labelledBy} className={cn('py-20 sm:py-24 lg:py-28', TONE[tone], className)}>
       <Container>{children}</Container>
     </section>
   )
 }
 
-export function Heading({ id, eyebrow, title, body, className, level = 2 }: { id?: string; eyebrow?: string; title: ReactNode; body?: ReactNode; className?: string; level?: 2 | 3 }) {
-  const H = level === 2 ? 'h2' : 'h3'
+export function Heading({ id, eyebrow, title, body, className, dark, center }: { id?: string; eyebrow?: string; title: ReactNode; body?: ReactNode; className?: string; dark?: boolean; center?: boolean }) {
   return (
-    <div className={cn('max-w-2xl', className)}>
-      {eyebrow && <Eyebrow className="mb-3">{eyebrow}</Eyebrow>}
-      <H id={id} className={cn('font-bold text-ink', level === 2 ? 'text-[clamp(28px,3vw,40px)] leading-[1.12]' : 'text-[24px] leading-8')}>
+    <div className={cn('max-w-2xl', center && 'mx-auto text-center', className)}>
+      {eyebrow && (
+        <Eyebrow dark={dark} className="mb-4">
+          {eyebrow}
+        </Eyebrow>
+      )}
+      <h2 id={id} className={cn('text-[clamp(30px,3.4vw,44px)] font-bold leading-[1.1] tracking-[-0.01em]', dark ? 'text-[var(--pub-on-dark)]' : 'text-ink')}>
         {title}
-      </H>
-      {body && <p className="mt-4 text-[17px] leading-[1.6] text-ink-2">{body}</p>}
+      </h2>
+      {body && <p className={cn('mt-5 text-[18px] leading-[1.6]', dark ? 'text-[var(--pub-on-dark-2)]' : 'text-ink-2')}>{body}</p>}
     </div>
   )
 }
 
-/** "In this build" or "Planned": shown wherever a capability is described. */
-export function StatusPill({ status, className }: { status: Status; className?: string }) {
+/** "Available now" or "Planned": shown wherever a capability is described. */
+export function StatusPill({ status, className, dark }: { status: Status; className?: string; dark?: boolean }) {
   return status === 'available' ? (
-    <span className={cn('inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-ok-soft px-2.5 py-1 text-[12px] font-semibold text-ok-text', className)}>
+    <span className={cn('inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1 text-[12px] font-semibold', dark ? 'bg-[rgb(72_179_64/0.16)] text-[var(--pub-leaf-text)]' : 'bg-ok-soft text-ok-text', className)}>
       <CircleCheck aria-hidden className="size-3.5" />
-      In this build
+      Available now
     </span>
   ) : (
-    <span className={cn('inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-dashed border-line-strong px-2.5 py-1 text-[12px] font-semibold text-ink-2', className)}>
-      <CircleDashed aria-hidden className="size-3.5" />
+    <span className={cn('inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-dashed px-2.5 py-1 text-[12px] font-semibold', dark ? 'border-[var(--pub-glass-line)] text-[var(--pub-on-dark-2)]' : 'border-line-strong text-ink-2', className)}>
+      <CircleDashed aria-hidden className="et-spin-slow size-3.5" />
       Planned
     </span>
   )
 }
 
-/** Opening block for the inner public pages. */
-export function PageHead({ eyebrow, title, body, children, className }: { eyebrow: string; title: ReactNode; body: ReactNode; children?: ReactNode; className?: string }) {
+/** Dark opening block shared by the inner public pages. */
+export function PageHead({ eyebrow, title, body, children }: { eyebrow: string; title: ReactNode; body: ReactNode; children?: ReactNode }) {
   return (
-    <section className={cn('border-b border-line bg-canvas', className)}>
-      <Container className="py-14 sm:py-16 lg:py-20">
-        <Eyebrow>{eyebrow}</Eyebrow>
-        <h1 className="mt-4 max-w-4xl text-[clamp(34px,4.2vw,56px)] font-bold leading-[1.06] text-ink">{title}</h1>
-        <p className="mt-5 max-w-2xl text-[18px] leading-[1.6] text-ink-2">{body}</p>
+    <section className="pub-dark relative overflow-hidden">
+      <div aria-hidden className="pub-streets absolute inset-0 [mask-image:linear-gradient(to_left,black,transparent_75%)]" />
+      <Container className="relative py-14 sm:py-16 lg:py-20">
+        <Eyebrow dark>{eyebrow}</Eyebrow>
+        <h1 className="mt-5 max-w-4xl text-[clamp(36px,4.2vw,64px)] font-bold leading-[1.05] tracking-[-0.015em] text-[var(--pub-on-dark)]">{title}</h1>
+        <p className="mt-6 max-w-2xl text-[19px] leading-[1.6] text-[var(--pub-on-dark-2)]">{body}</p>
         {children}
       </Container>
     </section>

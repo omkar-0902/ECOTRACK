@@ -7,6 +7,7 @@ import { IconButton } from '@/components/ui/Button'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { Sidebar } from './Sidebar'
 import { Topbar } from './Topbar'
+import { PageSkeleton } from './PageHeader'
 
 function MobileNav({ open, onClose }: { open: boolean; onClose: () => void }) {
   const ref = useRef<HTMLDivElement>(null)
@@ -33,11 +34,13 @@ function MobileNav({ open, onClose }: { open: boolean; onClose: () => void }) {
             animate={{ x: 0 }}
             exit={{ x: '-100%', transition: { duration: 0.18 } }}
             transition={{ type: 'spring', stiffness: 420, damping: 40 }}
-            className="absolute inset-y-0 left-0 w-[min(84vw,300px)] bg-night shadow-e3"
+            className="absolute inset-y-0 left-0 w-[min(84vw,288px)] shadow-e3"
           >
-            <IconButton variant="night" label="Close navigation" onClick={onClose} className="absolute right-3 top-3 z-10">
-              <X aria-hidden className="size-5" />
-            </IconButton>
+            <span className="absolute right-3 top-3 z-10">
+              <IconButton variant="night" label="Close navigation" onClick={onClose}>
+                <X aria-hidden className="size-5" />
+              </IconButton>
+            </span>
             <Sidebar onNavigate={onClose} />
           </motion.div>
         </div>
@@ -61,7 +64,7 @@ export function AppShell() {
   }, [pathname])
 
   return (
-    <div className="flex h-dvh flex-col overflow-hidden bg-muted text-ink">
+    <div className="et-workspace flex h-dvh flex-col overflow-hidden text-ink">
       <a
         href="#main"
         className="sr-only z-[2000] rounded-md bg-accent px-3 py-2 text-accent-ink focus:not-sr-only focus:fixed focus:left-3 focus:top-3"
@@ -80,7 +83,7 @@ export function AppShell() {
         className="relative flex min-h-0 flex-1 flex-col overflow-y-auto focus:outline-none"
       >
         <ErrorBoundary area="This page" resetKey={pathname}>
-          <Suspense fallback={<div className="flex-1" aria-busy="true" aria-label="Loading page" />}>
+          <Suspense fallback={<PageSkeleton />}>
             <motion.div
               key={pathname}
               className="relative z-10 flex min-h-full flex-col lg:min-h-0 lg:flex-1"

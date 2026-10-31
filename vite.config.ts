@@ -15,6 +15,11 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks(id) {
+          // Rollup's shared CommonJS helper must not land in the lazily used leaflet
+          // chunk, or every page would preload the map library just to reach it.
+          if (id.includes('commonjsHelpers')) {
+            return 'vendor-react'
+          }
           if (id.includes('node_modules/leaflet') || id.includes('node_modules/react-leaflet')) {
             return 'vendor-leaflet'
           }

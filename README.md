@@ -51,7 +51,10 @@ requested page after sign-in.
 
 React 19 · TypeScript (strict) · Vite 8 · Tailwind CSS 4 · React Router 8 ·
 Motion · Leaflet / React-Leaflet (OpenStreetMap tiles) · Recharts · Lucide ·
-Archivo (self-hosted via Fontsource).
+Instrument Sans, Geist and Geist Mono (self-hosted via Fontsource).
+
+Brand assets (logo lockups, mark, app icon) live in `public/brand/`. Backend
+integration and security notes: [`docs/BACKEND_HANDOFF.md`](docs/BACKEND_HANDOFF.md).
 
 ## Architecture
 

@@ -6,10 +6,10 @@ import { cn } from '@/lib/cn'
 export const LOG_STATUS_LABEL: Record<LogStatus, string> = { completed: 'Completed', pending: 'Pending', missed: 'Missed' }
 
 const TONE = {
-  ok: { text: 'text-ok-text', bg: 'bg-ok-soft', dot: 'bg-ok' },
-  warn: { text: 'text-warn-text', bg: 'bg-warn-soft', dot: 'bg-warn' },
-  crit: { text: 'text-crit-text', bg: 'bg-crit-soft', dot: 'bg-crit' },
-  neutral: { text: 'text-ink-2', bg: 'bg-maint-soft', dot: 'bg-ink-3' },
+  ok: { text: 'text-ok-text', bg: 'bg-ok-soft ring-ok/25', dot: 'bg-ok' },
+  warn: { text: 'text-warn-text', bg: 'bg-warn-soft ring-warn/30', dot: 'bg-warn' },
+  crit: { text: 'text-crit-text', bg: 'bg-crit-soft ring-crit/25', dot: 'bg-crit' },
+  neutral: { text: 'text-ink-2', bg: 'bg-maint-soft ring-line-strong', dot: 'bg-ink-3' },
 } as const
 export type Tone = keyof typeof TONE
 
@@ -19,7 +19,7 @@ export const LOG_TONE: Record<LogStatus, Tone> = { completed: 'ok', pending: 'wa
 export function StatusBadge({ tone, children, className }: { tone: Tone; children: ReactNode; className?: string }) {
   const t = TONE[tone]
   return (
-    <span className={cn('inline-flex h-6 items-center gap-1.5 whitespace-nowrap rounded-sm px-2 text-[12px] font-medium', t.bg, t.text, className)}>
+    <span className={cn('inline-flex h-6 items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 text-[12px] font-medium ring-1 ring-inset', t.bg, t.text, className)}>
       <span aria-hidden className={cn('size-1.5 rounded-full', t.dot)} />
       {children}
     </span>

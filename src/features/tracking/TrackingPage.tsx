@@ -34,7 +34,7 @@ export default function TrackingPage() {
 
   return (
     <Page title={TRACKING.title} subtitle={TRACKING.subtitle} actions={<DemoTag label="Demo positions, not live GPS" />}>
-      <Panel label={TRACKING.panelTitle} fill className="lg:grid lg:grid-cols-[minmax(0,1fr)_340px]">
+      <Panel label={TRACKING.panelTitle} fill className="lg:grid lg:grid-cols-[minmax(0,1fr)_320px] 2xl:grid-cols-[minmax(0,1fr)_360px]">
         {/* Map */}
         <div className="relative h-[56vh] min-h-[340px] lg:h-auto lg:min-h-0">
           <ErrorBoundary area="The map" compact>
@@ -42,7 +42,7 @@ export default function TrackingPage() {
           </ErrorBoundary>
 
           {/* Tracking core legend */}
-          <dl aria-label={TRACKING.legendTitle} className="absolute left-4 top-4 z-[400] flex flex-wrap gap-px overflow-hidden rounded-lg border border-line bg-line shadow-e2">
+          <dl aria-label={TRACKING.legendTitle} className="absolute left-3 top-3 z-[400] flex flex-wrap gap-px overflow-hidden rounded-lg border border-line bg-line shadow-e2">
             <LegendCell icon={<Signal aria-hidden className="size-3.5 text-accent-text" />} label={TRACKING.online.label} value={online} />
             <LegendCell icon={<WifiOff aria-hidden className="size-3.5 text-ink-3" />} label={TRACKING.offline.label} value={offline} />
             <LegendCell icon={<MapPin aria-hidden className="size-3.5 text-ink-3" />} label="On map" value={located} />
@@ -59,18 +59,18 @@ export default function TrackingPage() {
         {/* Unit panel */}
         <aside aria-label="Collector units" className="flex min-h-0 flex-col border-t border-line lg:border-l lg:border-t-0">
           {selected ? (
-            <div className="shrink-0 border-b border-line bg-muted p-5">
+            <div className="shrink-0 border-b border-line bg-muted p-4">
               <div className="flex items-start gap-3">
                 <Avatar name={selected.name} />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-[17px] font-bold text-ink">{selected.name}</p>
-                  <p className="text-[13px] text-ink-3">{selected.id}</p>
+                  <p className="data-mono text-[12.5px] text-ink-3">{selected.id}</p>
                 </div>
                 <IconButton label="Clear selection" size="sm" onClick={() => select(null)}>
                   <X aria-hidden className="size-4" />
                 </IconButton>
               </div>
-              <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 text-[13px]">
+              <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2.5 text-[13px]">
                 <div>
                   <dt className="text-ink-3">Status</dt>
                   <dd className="mt-1">
@@ -83,13 +83,13 @@ export default function TrackingPage() {
                 </div>
                 <div className="col-span-2">
                   <dt className="text-ink-3">Last reported position</dt>
-                  <dd className="tabular mt-1 text-ink">{selected.position ? `${selected.position.lat.toFixed(4)}, ${selected.position.lng.toFixed(4)}` : 'None reported'}</dd>
+                  <dd className="data-mono mt-1 text-[12.5px] text-ink">{selected.position ? `${selected.position.lat.toFixed(4)}, ${selected.position.lng.toFixed(4)}` : 'None reported'}</dd>
                 </div>
               </dl>
             </div>
           ) : null}
 
-          <div className="flex shrink-0 flex-col gap-3 border-b border-line p-4">
+          <div className="flex shrink-0 flex-col gap-2.5 border-b border-line p-3">
             <SearchInput label="Search units" value={query} onChange={setQuery} placeholder="Search name or ECO-ID" />
             <div role="radiogroup" aria-label="Unit status" className="grid grid-cols-3 gap-1 rounded-lg border border-line bg-muted p-1">
               {(['all', 'online', 'offline'] as Filter[]).map((f) => (
@@ -99,7 +99,7 @@ export default function TrackingPage() {
                   role="radio"
                   aria-checked={filter === f}
                   onClick={() => setFilter(f)}
-                  className={cn('h-9 rounded-md text-[13px] capitalize transition-colors', filter === f ? 'bg-panel font-semibold text-ink shadow-e1' : 'text-ink-2 hover:text-ink')}
+                  className={cn('h-8 rounded-md text-[13px] capitalize transition-colors', filter === f ? 'bg-panel font-semibold text-ink shadow-e1 dark:bg-raised' : 'text-ink-2 hover:text-ink')}
                 >
                   {f} <span className="tabular text-ink-3">{f === 'all' ? collectors.length : f === 'online' ? online : offline}</span>
                 </button>
@@ -128,12 +128,12 @@ export default function TrackingPage() {
                     type="button"
                     onClick={() => select(c.id)}
                     aria-pressed={c.id === selectedId}
-                    className={cn('relative flex min-h-14 w-full items-center gap-3 px-5 py-3 text-left transition-colors', c.id === selectedId ? 'bg-accent-soft shadow-[inset_3px_0_0_var(--et-accent)]' : 'hover:bg-hover')}
+                    className={cn('relative flex min-h-12 w-full items-center gap-3 px-4 py-2 text-left transition-colors', c.id === selectedId ? 'bg-accent-soft shadow-[inset_3px_0_0_var(--et-accent)]' : 'hover:bg-hover')}
                   >
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate text-[15px] font-semibold text-ink">{c.name}</span>
-                      <span className="flex items-center gap-1.5 text-[13px] text-ink-3">
-                        <span className="">{c.id}</span>
+                      <span className="block truncate text-[14px] font-semibold text-ink">{c.name}</span>
+                      <span className="flex items-center gap-1.5 text-[12.5px] text-ink-3">
+                        <span className="data-mono">{c.id}</span>
                         {!c.position && (
                           <span className="inline-flex items-center gap-1">
                             <MapPinOff aria-hidden className="size-3" /> no position
@@ -155,7 +155,7 @@ export default function TrackingPage() {
 
 function LegendCell({ icon, label, value }: { icon: React.ReactNode; label: string; value: number }) {
   return (
-    <div className="flex items-center gap-2 bg-panel px-3.5 py-2.5">
+    <div className="flex items-center gap-2 bg-panel px-3 py-2">
       {icon}
       <dt className="text-[13px] text-ink-2">{label}</dt>
       <dd className="tabular text-[15px] font-bold text-ink">{value}</dd>

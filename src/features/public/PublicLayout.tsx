@@ -7,12 +7,13 @@ import { useTheme } from '@/app/providers/ThemeProvider'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { Brand } from '@/components/layout/Brand'
 import { Button, IconButton } from '@/components/ui/Button'
-import { LoginDialog } from '@/features/auth/LoginDialog'
+import { LoginDialog, type AuthMode } from '@/features/auth/LoginDialog'
 import { PUBLIC_NAV } from '@/content/product'
 import { FOOTER } from '@/content/original'
 import { cn } from '@/lib/cn'
-import { Container, StatusPill } from './site/ui'
-import { PRODUCT_LINE, TAGLINE } from './site/content'
+import { Container } from './site/ui'
+import { PRODUCT_LINE } from './site/content'
+import { CONTACT_PATH, enquiryChannel } from './site/config'
 import './site/public.css'
 
 type PublicContext = { openSignIn: () => void }
@@ -22,9 +23,20 @@ export function usePublicActions() {
   return useOutletContext<PublicContext>()
 }
 
-function MobileMenu({ open, onClose, onSignIn, signedIn }: { open: boolean; onClose: () => void; onSignIn: () => void; signedIn: boolean }) {
+/** Per-route title and description for the public pages. */
+const META: Record<string, { title: string; description: string }> = {
+  '/overview': { title: 'EcoTrack | Smarter waste collection for cleaner cities', description: 'EcoTrack helps cities see what was collected, what was missed and where their crews are, so every pickup can be accounted for.' },
+  '/features': { title: 'Features | EcoTrack', description: 'What EcoTrack does for city teams today, and what is planned for residents and collection crews.' },
+  '/how-it-works': { title: 'How it works | EcoTrack', description: 'How a pickup moves from request to record, and what the EcoTrack console does for city teams today.' },
+  '/preview': { title: 'Product preview | EcoTrack', description: 'See the EcoTrack municipal console with sample data, and concepts for the resident and crew apps.' },
+  '/login': { title: 'Sign in | EcoTrack', description: 'Sign in to the EcoTrack municipal console.' },
+  '/signup': { title: 'Create account | EcoTrack', description: 'Create an EcoTrack account for the municipal console.' },
+}
+
+function MobileMenu({ open, onClose, onSignIn, onSignUp, signedIn }: { open: boolean; onClose: () => void; onSignIn: () => void; onSignUp: () => void; signedIn: boolean }) {
   const ref = useRef<HTMLDivElement>(null)
   useFocusTrap(ref, open, onClose)
+  const demo = enquiryChannel() !== null
   return (
     <AnimatePresence>
       {open && (
@@ -38,11 +50,11 @@ function MobileMenu({ open, onClose, onSignIn, signedIn }: { open: boolean; onCl
             initial={{ y: -12, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -8, opacity: 0, transition: { duration: 0.12 } }}
-            className="absolute inset-x-0 top-0 border-b border-line bg-canvas px-4 pb-6 pt-3 shadow-e3"
+            className="pub-chrome pub-sheet absolute inset-x-0 top-0 px-5 pb-6 pt-3 shadow-e3"
           >
             <div className="flex h-12 items-center justify-between">
-              <Brand />
-              <IconButton label="Close menu" onClick={onClose}>
+              <Brand tone="night" />
+              <IconButton variant="night" label="Close menu" onClick={onClose}>
                 <X aria-hidden className="size-5" />
               </IconButton>
             </div>
@@ -53,11 +65,11 @@ function MobileMenu({ open, onClose, onSignIn, signedIn }: { open: boolean; onCl
                     <NavLink
                       to={n.to}
                       onClick={onClose}
-                      className={({ isActive }) => cn('flex h-13 items-center border-b border-line text-[17px]', isActive ? 'font-semibold text-ink' : 'text-ink-2')}
+                      className={({ isActive }) => cn('flex h-13 items-center border-b border-[var(--pub-dark-line)] text-[17px]', isActive ? 'font-semibold text-[var(--pub-on-dark)]' : 'text-[var(--pub-on-dark-2)]')}
                     >
                       {({ isActive }) => (
                         <>
-                          {isActive && <span aria-hidden className="mr-3 h-5 w-[3px] rounded-full bg-brand" />}
+                          {isActive && <span aria-hidden className="mr-3 h-5 w-[3px] rounded-full bg-[var(--pub-leaf)]" />}
                           {n.label}
                         </>
                       )}
@@ -66,17 +78,37 @@ function MobileMenu({ open, onClose, onSignIn, signedIn }: { open: boolean; onCl
                 ))}
               </ul>
             </nav>
-            <Button
-              variant="primary"
-              size="lg"
-              className="mt-6 w-full"
-              onClick={() => {
-                onClose()
-                onSignIn()
-              }}
-            >
-              {signedIn ? 'Open console' : 'Sign in to the console'}
-            </Button>
+            <div className="mt-6 flex flex-col gap-3">
+              {demo && (
+                <Link to={CONTACT_PATH} onClick={onClose} className="inline-flex h-12 items-center justify-center rounded-lg bg-accent text-[15px] font-medium text-accent-ink hover:bg-accent-hover">
+                  Request a demo
+                </Link>
+              )}
+              {!signedIn && (
+                <Button
+                  variant="inverse"
+                  size="lg"
+                  className="w-full"
+                  onClick={() => {
+                    onClose()
+                    onSignUp()
+                  }}
+                >
+                  Sign up
+                </Button>
+              )}
+              <Button
+                variant="light"
+                size="lg"
+                className="w-full"
+                onClick={() => {
+                  onClose()
+                  onSignIn()
+                }}
+              >
+                {signedIn ? 'Open console' : 'Sign in'}
+              </Button>
+            </div>
           </motion.div>
         </div>
       )}
@@ -85,37 +117,52 @@ function MobileMenu({ open, onClose, onSignIn, signedIn }: { open: boolean; onCl
 }
 
 /**
- * Pre-login site frame: light header, routed pages and footer. Each nav item
- * is its own route. The `et-public` class scopes the public-only styles.
+ * Pre-login site frame: charcoal header and footer around the routed pages.
+ * The `et-public` class scopes the public-only styles.
  */
 export function PublicLayout() {
   const { user } = useAuth()
   const { resolved, setPreference } = useTheme()
   const navigate = useNavigate()
-  const { pathname } = useLocation()
+  const location = useLocation()
+  const { pathname, hash } = location
   const [params, setParams] = useSearchParams()
   const [menuOpen, setMenuOpen] = useState(false)
-  const loginOpen = !user && (pathname === '/login' || params.get('signin') === '1')
+  const authRoute = pathname === '/login' || pathname === '/signup'
+  const authMode: AuthMode = pathname === '/signup' || params.get('signup') === '1' ? 'signup' : 'signin'
+  const loginOpen = !user && (authRoute || params.get('signin') === '1' || params.get('signup') === '1')
+  const demo = enquiryChannel() !== null
+
+  useEffect(() => {
+    // Links such as /overview#contact land on their section once it has rendered.
+    if (!hash) return
+    const id = window.setTimeout(() => document.getElementById(hash.slice(1))?.scrollIntoView(), 60)
+    return () => window.clearTimeout(id)
+  }, [pathname, hash])
 
   useEffect(() => {
     window.scrollTo({ top: 0 })
-    const titles: Record<string, string> = {
-      '/overview': 'EcoTrack — Smart Waste Operations Platform',
-      '/features': 'EcoTrack — Platform Features & Capabilities',
-      '/how-it-works': 'EcoTrack — How It Works (Geofencing Chain)',
-      '/preview': 'EcoTrack — Interactive Multi-Role Preview',
-      '/login': 'EcoTrack — Sign In to Command Center',
-    }
-    document.title = titles[pathname] || 'EcoTrack — Smart Waste Operations Platform'
+    const meta = META[pathname] ?? META['/overview']
+    document.title = meta.title
+    document.querySelector('meta[name="description"]')?.setAttribute('content', meta.description)
   }, [pathname])
 
   const openSignIn = () => {
     if (user) navigate('/dashboard')
     else setParams({ signin: '1' })
   }
+  const openSignUp = () => {
+    if (user) navigate('/dashboard')
+    else setParams({ signup: '1' })
+  }
   const closeSignIn = () => {
-    if (pathname === '/login') navigate('/overview', { replace: true })
+    if (authRoute) navigate('/overview', { replace: true })
     else setParams({}, { replace: true })
+  }
+  // Switching keeps the page (and any "return to" target) and only swaps the mode.
+  const switchAuth = (mode: AuthMode) => {
+    if (authRoute) navigate(mode === 'signup' ? '/signup' : '/login', { replace: true, state: location.state })
+    else setParams(mode === 'signup' ? { signup: '1' } : { signin: '1' }, { replace: true })
   }
 
   return (
@@ -123,10 +170,10 @@ export function PublicLayout() {
       <a href="#content" className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:rounded-md focus:bg-accent focus:px-3 focus:py-2 focus:text-accent-ink">
         Skip to content
       </a>
-      <header className="sticky top-0 z-40 shrink-0 border-b border-line bg-canvas">
+      <header className="pub-chrome sticky top-0 z-40 shrink-0 border-b border-[var(--pub-dark-line)]">
         <Container className="flex h-[68px] items-center gap-8">
-          <Link to="/overview" aria-label="EcoTrack overview" className="shrink-0">
-            <Brand />
+          <Link to="/overview" aria-label="EcoTrack home" className="shrink-0">
+            <Brand tone="night" />
           </Link>
           <nav aria-label="Site" className="hidden h-full md:block">
             <ul className="flex h-full items-center gap-1">
@@ -134,12 +181,14 @@ export function PublicLayout() {
                 <li key={n.to} className="h-full">
                   <NavLink
                     to={n.to}
-                    className={({ isActive }) => cn('relative flex h-full items-center px-3 text-[15px] font-medium transition-colors', isActive ? 'text-ink' : 'text-ink-2 hover:text-ink')}
+                    className={({ isActive }) =>
+                      cn('relative flex h-full items-center px-3 text-[15px] font-medium transition-colors', isActive ? 'text-[var(--pub-on-dark)]' : 'text-[var(--pub-on-dark-2)] hover:text-[var(--pub-on-dark)]')
+                    }
                   >
                     {({ isActive }) => (
                       <>
                         {n.label}
-                        {isActive && <motion.span layoutId="public-nav" className="absolute inset-x-3 bottom-0 h-[3px] rounded-t-full bg-brand" transition={{ type: 'spring', stiffness: 500, damping: 40 }} />}
+                        {isActive && <motion.span layoutId="public-nav" className="absolute inset-x-3 bottom-0 h-[3px] rounded-t-full bg-[var(--pub-leaf)]" transition={{ type: 'spring', stiffness: 500, damping: 40 }} />}
                       </>
                     )}
                   </NavLink>
@@ -148,16 +197,31 @@ export function PublicLayout() {
             </ul>
           </nav>
           <div className="ml-auto flex items-center gap-2">
-            <IconButton label={resolved === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'} onClick={() => setPreference(resolved === 'dark' ? 'light' : 'dark')}>
+            <IconButton variant="night" label={resolved === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'} onClick={() => setPreference(resolved === 'dark' ? 'light' : 'dark')}>
               {resolved === 'dark' ? <Moon aria-hidden strokeWidth={1.75} className="size-[18px]" /> : <Sun aria-hidden strokeWidth={1.75} className="size-[18px]" />}
             </IconButton>
-            <span className="hidden sm:block">
-              <Button variant="primary" onClick={openSignIn} icon={<ArrowRight aria-hidden className="size-4" />} trailingIcon>
-                {user ? 'Open console' : 'Sign in'}
-              </Button>
-            </span>
+            {user ? (
+              <span className="hidden sm:block">
+                <Button variant="light" onClick={openSignIn} icon={<ArrowRight aria-hidden className="size-4" />} trailingIcon>
+                  Open console
+                </Button>
+              </span>
+            ) : (
+              <>
+                <span className="hidden sm:block">
+                  <button type="button" onClick={openSignIn} className="h-10 rounded-lg px-3.5 text-[15px] font-medium text-[var(--pub-on-dark-2)] transition-colors hover:bg-[var(--pub-chrome-hover)] hover:text-[var(--pub-on-dark)] active:translate-y-px">
+                    Sign in
+                  </button>
+                </span>
+                <span className="hidden sm:block">
+                  <Button variant="inverse" onClick={openSignUp}>
+                    Sign up
+                  </Button>
+                </span>
+              </>
+            )}
             <span className="md:hidden">
-              <IconButton label="Open menu" onClick={() => setMenuOpen(true)}>
+              <IconButton variant="night" label="Open menu" onClick={() => setMenuOpen(true)}>
                 <Menu aria-hidden className="size-5" />
               </IconButton>
             </span>
@@ -171,52 +235,80 @@ export function PublicLayout() {
         </motion.div>
       </main>
 
-      <footer className="shrink-0 border-t border-line bg-[var(--pub-field)]">
-        <Container className="grid gap-10 py-12 md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1fr)]">
-          <div className="max-w-sm">
-            <Brand />
-            <p className="mt-4 text-[15px] font-semibold text-ink">{PRODUCT_LINE}</p>
-            <p className="mt-1 text-[15px] italic text-ink-2">“{TAGLINE}”</p>
-          </div>
-          <nav aria-labelledby="footer-explore">
-            <h2 id="footer-explore" className="text-[14px] font-bold text-ink">
-              Explore
-            </h2>
-            <ul className="mt-4 flex flex-col gap-2.5 text-[15px]">
-              {PUBLIC_NAV.map((n) => (
-                <li key={n.to}>
-                  <Link to={n.to} className="text-ink-2 transition-colors hover:text-[var(--pub-forest)]">
-                    {n.label}
-                  </Link>
+      <footer className="relative shrink-0 overflow-hidden bg-[var(--pub-charcoal)] text-[var(--pub-on-dark)] [--et-focus:var(--pub-leaf)]">
+        <div aria-hidden className="pub-streets absolute inset-0 opacity-60 [mask-image:linear-gradient(to_bottom,black,transparent_55%)]" />
+        <Container className="relative">
+          {/* Directory */}
+          <div className="grid gap-10 pb-14 pt-16 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.5fr)_repeat(3,minmax(0,1fr))]">
+            <div className="max-w-sm sm:col-span-2 lg:col-span-1">
+              <Brand tone="night" />
+              <p className="mt-5 text-[15px] leading-[1.65] text-[var(--pub-on-dark-2)]">{PRODUCT_LINE}. A municipal operations console for collection visibility, accountability and crew coordination.</p>
+            </div>
+            <nav aria-labelledby="footer-explore">
+              <h2 id="footer-explore" className="text-[13px] font-semibold uppercase tracking-[0.1em] text-[var(--pub-on-dark-3)]">
+                Explore
+              </h2>
+              <ul className="mt-5 flex flex-col gap-3 text-[15px]">
+                {PUBLIC_NAV.map((n) => (
+                  <li key={n.to}>
+                    <Link to={n.to} className="text-[var(--pub-on-dark-2)] transition-colors hover:text-[var(--pub-on-dark)]">
+                      {n.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+            <nav aria-labelledby="footer-platform">
+              <h2 id="footer-platform" className="text-[13px] font-semibold uppercase tracking-[0.1em] text-[var(--pub-on-dark-3)]">
+                Platform
+              </h2>
+              <ul className="mt-5 flex flex-col gap-3 text-[15px]">
+                <li>
+                  <button type="button" onClick={openSignIn} className="text-[var(--pub-on-dark-2)] transition-colors hover:text-[var(--pub-on-dark)]">
+                    Municipal console
+                  </button>
                 </li>
-              ))}
-              <li>
-                <button type="button" onClick={openSignIn} className="font-medium text-[var(--pub-forest)] hover:underline">
-                  {user ? 'Open console' : 'Sign in'}
-                </button>
-              </li>
-            </ul>
-          </nav>
-          <div>
-            <h2 className="text-[14px] font-bold text-ink">On these pages</h2>
-            <ul className="mt-4 flex flex-col gap-3 text-[14px] text-ink-2">
-              <li className="flex flex-wrap items-center gap-2">
-                <StatusPill status="available" /> works in this web build
-              </li>
-              <li className="flex flex-wrap items-center gap-2">
-                <StatusPill status="planned" /> described in the EcoTrack proposal, not built yet
-              </li>
-              <li className="text-[13px] text-ink-3">Console data is a labelled demo dataset stored in your browser.</li>
-            </ul>
+                <li className="flex items-center gap-2 text-[var(--pub-on-dark-3)]">
+                  <Link to="/preview?for=resident" className="transition-colors hover:text-[var(--pub-on-dark)]">
+                    Resident app
+                  </Link>
+                  <span className="rounded-full border border-[var(--pub-dark-line)] px-1.5 text-[11px]">Planned</span>
+                </li>
+                <li className="flex items-center gap-2 text-[var(--pub-on-dark-3)]">
+                  <Link to="/preview?for=collector" className="transition-colors hover:text-[var(--pub-on-dark)]">
+                    Crew app
+                  </Link>
+                  <span className="rounded-full border border-[var(--pub-dark-line)] px-1.5 text-[11px]">Planned</span>
+                </li>
+                {demo && (
+                  <li>
+                    <Link to={CONTACT_PATH} className="font-medium text-[var(--pub-leaf-text)] hover:underline">
+                      Contact us
+                    </Link>
+                  </li>
+                )}
+              </ul>
+            </nav>
+            <div>
+              <h2 className="text-[13px] font-semibold uppercase tracking-[0.1em] text-[var(--pub-on-dark-3)]">Privacy</h2>
+              <p className="mt-5 text-[14px] leading-[1.65] text-[var(--pub-on-dark-2)]">
+                No analytics or advertising cookies. Sample data stays in your browser's local storage; maps load tiles from OpenStreetMap.
+              </p>
+            </div>
           </div>
-        </Container>
-        <Container>
-          <p className="border-t border-line py-5 text-[13px] text-ink-3">{FOOTER.legal}</p>
+
+          <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-t border-[var(--pub-dark-line)] py-6 text-[13px] text-[var(--pub-on-dark-3)]">
+            <p>{FOOTER.legal}</p>
+            <p>Console figures shown on this site are sample data.</p>
+            <a href="#content" className="transition-colors hover:text-[var(--pub-on-dark)]">
+              Back to top ↑
+            </a>
+          </div>
         </Container>
       </footer>
 
-      <MobileMenu open={menuOpen} onClose={() => setMenuOpen(false)} onSignIn={openSignIn} signedIn={!!user} />
-      <LoginDialog open={loginOpen} onClose={closeSignIn} />
+      <MobileMenu open={menuOpen} onClose={() => setMenuOpen(false)} onSignIn={openSignIn} onSignUp={openSignUp} signedIn={!!user} />
+      <LoginDialog open={loginOpen} mode={authMode} onClose={closeSignIn} onSwitch={switchAuth} />
     </div>
   )
 }

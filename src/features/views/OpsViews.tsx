@@ -5,6 +5,7 @@
  */
 import type { CollectionLog, Collector } from '@/types/domain'
 import { dashboardMetrics } from '@/store/selectors'
+import { formatPercent } from '@/lib/metrics'
 import { Avatar } from '@/components/ui/Avatar'
 import { LogStatusBadge, UnitStatusBadge, toneDot, type Tone } from '@/components/ui/Status'
 import { DASHBOARD, COLLECTORS } from '@/content/original'
@@ -54,10 +55,10 @@ export function MetricStrip({ logs, now, compact }: { logs: CollectionLog[]; now
 /** Share of today's logs by status, as one segmented bar with a legend. */
 export function StatusMix({ logs, now }: { logs: CollectionLog[]; now: number }) {
   const m = dashboardMetrics(logs, now)
-  const parts: { label: string; value: number; tone: Tone }[] = [
-    { label: 'Completed', value: m.collected, tone: 'ok' },
-    { label: 'Pending', value: m.active, tone: 'warn' },
-    { label: 'Missed', value: m.missed, tone: 'crit' },
+  const parts: { label: string; value: number; pct: number | null; tone: Tone }[] = [
+    { label: 'Completed', value: m.collected, pct: m.percents?.completed ?? null, tone: 'ok' },
+    { label: 'Pending', value: m.active, pct: m.percents?.pending ?? null, tone: 'warn' },
+    { label: 'Missed', value: m.missed, pct: m.percents?.missed ?? null, tone: 'crit' },
   ]
   const total = m.requests
   return (
@@ -70,7 +71,7 @@ export function StatusMix({ logs, now }: { logs: CollectionLog[]; now: number })
           <li key={p.label} className="inline-flex items-center gap-1.5">
             <span aria-hidden className={cn('size-2 rounded-[2px]', toneDot(p.tone))} />
             {p.label}
-            <span className="tabular text-ink">{total ? Math.round((p.value / total) * 100) : 0}%</span>
+            <span className="tabular text-ink">{formatPercent(p.pct)}</span>
           </li>
         ))}
       </ul>
@@ -92,7 +93,7 @@ export function LogTable({ logs, now, showDate, className }: { logs: CollectionL
       {logs.map((l) => (
         <li key={l.id} className="flex items-start justify-between gap-3 px-4 py-3">
           <div className="min-w-0">
-            <p className="text-[14px] font-semibold text-ink">{l.id}</p>
+            <p className="data-mono text-[13px] font-medium text-ink">{l.id}</p>
             <p className="mt-0.5 truncate text-[14px] text-ink-2">{l.address}</p>
             <p className="tabular mt-0.5 text-[13px] text-ink-3">
               {l.sector}, {when(l.createdAt)}
@@ -103,25 +104,25 @@ export function LogTable({ logs, now, showDate, className }: { logs: CollectionL
       ))}
     </ul>
     <table className={cn('hidden w-full min-w-[560px] text-left text-[14px] sm:table', className)}>
-      <thead className="sticky top-0 z-10 bg-muted text-[12px] uppercase tracking-[0.06em] text-ink-3 shadow-[inset_0_-1px_0_var(--et-line)]">
+      <thead className="sticky top-0 z-10 bg-muted text-[11.5px] uppercase tracking-[0.06em] text-ink-3 shadow-[inset_0_-1px_0_var(--et-line)]">
         <tr>
-          <th scope="col" className="py-3 pl-6 pr-3 font-semibold">Log ID</th>
-          <th scope="col" className="px-3 py-3 font-semibold">Address</th>
-          <th scope="col" className="px-3 py-3 font-semibold">Sector</th>
-          <th scope="col" className="px-3 py-3 font-semibold">Status</th>
-          <th scope="col" className="py-3 pl-3 pr-6 text-right font-semibold">Logged</th>
+          <th scope="col" className="py-2.5 pl-5 pr-3 font-semibold">Log ID</th>
+          <th scope="col" className="px-3 py-2.5 font-semibold">Address</th>
+          <th scope="col" className="px-3 py-2.5 font-semibold">Sector</th>
+          <th scope="col" className="px-3 py-2.5 font-semibold">Status</th>
+          <th scope="col" className="py-2.5 pl-3 pr-5 text-right font-semibold">Logged</th>
         </tr>
       </thead>
       <tbody>
         {logs.map((l) => (
           <tr key={l.id} className="border-b border-line transition-colors last:border-b-0 hover:bg-hover">
-            <td className="whitespace-nowrap py-3.5 pl-6 pr-3 font-semibold text-ink">{l.id}</td>
-            <td className="max-w-[300px] truncate px-3 py-3.5 text-ink-2">{l.address}</td>
-            <td className="whitespace-nowrap px-3 py-3.5 text-ink-2">{l.sector}</td>
-            <td className="px-3 py-3">
+            <td className="data-mono whitespace-nowrap py-2.5 pl-5 pr-3 text-[13px] font-medium text-ink">{l.id}</td>
+            <td className="max-w-[300px] truncate px-3 py-2.5 text-ink-2">{l.address}</td>
+            <td className="whitespace-nowrap px-3 py-2.5 text-ink-2">{l.sector}</td>
+            <td className="px-3 py-2">
               <LogStatusBadge status={l.status} />
             </td>
-            <td className="tabular whitespace-nowrap py-3.5 pl-3 pr-6 text-right text-[13px] text-ink-3">{when(l.createdAt)}</td>
+            <td className="data-mono whitespace-nowrap py-2.5 pl-3 pr-5 text-right text-[12.5px] text-ink-3">{when(l.createdAt)}</td>
           </tr>
         ))}
       </tbody>
@@ -147,7 +148,7 @@ export function CollectorTable({ collectors, selectedId, onSelect, className }: 
             <span className="min-w-0 flex-1">
               <span className="block truncate text-[15px] font-semibold text-ink">{c.name}</span>
               <span className="block text-[13px] text-ink-3">
-                <span>{c.id}</span>, <span className="tabular">{c.phone}</span>
+                <span className="data-mono">{c.id}</span>, <span className="tabular">{c.phone}</span>
               </span>
             </span>
             <UnitStatusBadge online={c.online} />
@@ -156,12 +157,12 @@ export function CollectorTable({ collectors, selectedId, onSelect, className }: 
       ))}
     </ul>
     <table className={cn('hidden w-full min-w-[520px] text-left text-[14px] sm:table', className)}>
-      <thead className="sticky top-0 z-10 bg-muted text-[12px] uppercase tracking-[0.06em] text-ink-3 shadow-[inset_0_-1px_0_var(--et-line)]">
+      <thead className="sticky top-0 z-10 bg-muted text-[11.5px] uppercase tracking-[0.06em] text-ink-3 shadow-[inset_0_-1px_0_var(--et-line)]">
         <tr>
-          <th scope="col" className="py-3 pl-6 pr-3 font-semibold">{COLLECTORS.columns.info}</th>
-          <th scope="col" className="px-3 py-3 font-semibold">{COLLECTORS.columns.id}</th>
-          <th scope="col" className="px-3 py-3 font-semibold">Status</th>
-          <th scope="col" className="py-3 pl-3 pr-6 text-right font-semibold">{COLLECTORS.columns.phone}</th>
+          <th scope="col" className="py-2.5 pl-5 pr-3 font-semibold">{COLLECTORS.columns.info}</th>
+          <th scope="col" className="px-3 py-2.5 font-semibold">{COLLECTORS.columns.id}</th>
+          <th scope="col" className="px-3 py-2.5 font-semibold">Status</th>
+          <th scope="col" className="py-2.5 pl-3 pr-5 text-right font-semibold">{COLLECTORS.columns.phone}</th>
         </tr>
       </thead>
       <tbody>
@@ -174,7 +175,7 @@ export function CollectorTable({ collectors, selectedId, onSelect, className }: 
               aria-selected={onSelect ? active : undefined}
               className={cn('border-b border-line transition-colors last:border-b-0', onSelect && 'cursor-pointer', active ? 'bg-accent-soft' : 'hover:bg-hover')}
             >
-              <td className="py-3 pl-6 pr-3">
+              <td className="py-2 pl-5 pr-3">
                 <span className="flex items-center gap-3">
                   <Avatar name={c.name} size="sm" />
                   {onSelect ? (
@@ -193,11 +194,11 @@ export function CollectorTable({ collectors, selectedId, onSelect, className }: 
                   )}
                 </span>
               </td>
-              <td className="px-3 py-3 text-ink-2">{c.id}</td>
-              <td className="px-3 py-3">
+              <td className="data-mono px-3 py-2 text-[13px] text-ink-2">{c.id}</td>
+              <td className="px-3 py-2">
                 <UnitStatusBadge online={c.online} />
               </td>
-              <td className="tabular py-3 pl-3 pr-6 text-right text-ink-2">{c.phone}</td>
+              <td className="tabular py-2 pl-3 pr-5 text-right text-ink-2">{c.phone}</td>
             </tr>
           )
         })}

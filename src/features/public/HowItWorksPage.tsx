@@ -1,169 +1,82 @@
-import { ArrowRight, Building2, Radar, Truck, UserRound, type LucideIcon } from 'lucide-react'
-import { Button } from '@/components/ui/Button'
+import { ArrowRight, Bell, Building2, CheckCircle2, MapPin, type LucideIcon } from 'lucide-react'
 import { ButtonLink } from '@/components/ui/ButtonLink'
-import { WORKFLOW } from '@/content/product'
 import { cn } from '@/lib/cn'
-import { usePublicActions } from './PublicLayout'
-import { FLOW, GEOFENCE_STEPS } from './site/content'
-import { Band, Container, Eyebrow, Heading, PageHead, StatusPill } from './site/ui'
-import { GeofenceMap } from './site/visuals'
+import { JOURNEY, TODAY_STEPS } from './site/content'
+import { Container, PageHead, StatusPill } from './site/ui'
+import { ConsoleCard, GeofenceMap } from './site/visuals'
 
-const LANES: { role: (typeof FLOW)[number]['role']; label: string; icon: LucideIcon }[] = [
-  { role: 'Resident', label: 'Resident', icon: UserRound },
-  { role: 'System', label: 'Geofence', icon: Radar },
-  { role: 'Collector', label: 'Collector', icon: Truck },
-  { role: 'Municipal', label: 'Municipal team', icon: Building2 },
-]
-
-/** What each person experiences at each geofencing stage (slide 3). */
-const GEOFENCE_DETAIL = [
-  'The resident drops a pin where the waste is and requests a pickup.',
-  'The collector’s truck crosses into the geofenced zone around that pin.',
-  'The resident gets an automatic “collector is near” notification.',
-  'The waste is brought out while the truck is still in the zone.',
-  'The pickup is confirmed, closing the request for both sides.',
-]
+const STEP_ICON: LucideIcon[] = [MapPin, Bell, CheckCircle2, Building2]
 
 export default function HowItWorksPage() {
-  const { openSignIn } = usePublicActions()
   return (
     <>
-      <PageHead
-        eyebrow="How it works"
-        title={
-          <>
-            One pickup, <span className="text-[var(--pub-forest)]">followed from request to record.</span>
-          </>
-        }
-        body="The EcoTrack proposal describes five steps that pass a single pickup between the resident, the geofence, the collector and the municipal team. Here is who does what, and which part runs in this build today."
-      />
+      <PageHead eyebrow="How it works" title="From a request to a record." body="Four steps, from the resident's doorstep to the city's record." />
 
-      {/* Swimlanes */}
-      <Band labelledBy="flow-title">
-        <Heading id="flow-title" eyebrow="The flow" title="Who acts at each step" />
-
-        {/* Desktop: lanes by role, steps by column */}
-        <div className="mt-12 hidden overflow-hidden rounded-xl border border-line lg:block">
-          <div className="grid grid-cols-[180px_repeat(5,minmax(0,1fr))] border-b border-line bg-muted">
-            <div className="px-5 py-4 text-[13px] font-semibold uppercase tracking-[0.08em] text-ink-3">Step</div>
-            {FLOW.map((s, i) => (
-              <div key={s.n} className="relative flex items-center justify-center py-4">
-                {i > 0 && <span aria-hidden className="absolute left-0 right-1/2 top-1/2 h-0.5 bg-[var(--pub-ring)]" />}
-                {i < FLOW.length - 1 && <span aria-hidden className="absolute left-1/2 right-0 top-1/2 h-0.5 bg-[var(--pub-ring)]" />}
-                <span className="tabular relative grid size-9 place-items-center rounded-full bg-[var(--pub-forest)] text-[15px] font-bold text-white">{s.n}</span>
-              </div>
-            ))}
-          </div>
-          <div role="list" aria-label="Steps by role">
-            {LANES.map((lane, li) => (
-              <div key={lane.role} className={cn('grid grid-cols-[180px_repeat(5,minmax(0,1fr))]', li > 0 && 'border-t border-line', li % 2 === 1 ? 'bg-[var(--pub-field)]' : 'bg-canvas')}>
-                <div className="flex items-center gap-3 border-r border-line px-5 py-6">
-                  <span className="grid size-9 place-items-center rounded-lg bg-[var(--pub-mint)] text-[var(--pub-forest)]">
-                    <lane.icon aria-hidden strokeWidth={1.75} className="size-[18px]" />
+      {/* The four steps */}
+      <section aria-labelledby="steps-title" className="bg-canvas py-24 lg:py-28">
+        <Container>
+          <h2 id="steps-title" className="sr-only">
+            The four steps
+          </h2>
+          <ol className="relative grid gap-12 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
+            <span aria-hidden className="absolute left-[12.5%] right-[12.5%] top-10 hidden h-0.5 bg-[linear-gradient(to_right,var(--pub-ring)_66%,var(--pub-forest)_66%)] lg:block" />
+            {JOURNEY.map((s, i) => {
+              const Icon = STEP_ICON[i]
+              return (
+                <li key={s.n} className="relative flex flex-col items-start lg:items-center lg:text-center">
+                  <span className={cn('relative grid size-20 place-items-center rounded-full border-[6px] border-canvas', s.status === 'available' ? 'bg-[var(--pub-forest)] text-white' : 'bg-[var(--pub-mint)] text-[var(--pub-forest)]')}>
+                    <Icon aria-hidden strokeWidth={1.75} className="size-8" />
                   </span>
-                  <span className="text-[15px] font-bold text-ink">{lane.label}</span>
-                </div>
-                {FLOW.map((s) =>
-                  s.role === lane.role ? (
-                    <div key={s.n} role="listitem" className="p-3">
-                      <article className="h-full rounded-lg border border-line bg-panel p-4 shadow-e1">
-                        <p className="sr-only">
-                          Step {s.n}, {lane.label}:
-                        </p>
-                        <h3 className="text-[16px] font-bold leading-snug text-ink">{s.title}</h3>
-                        <p className="mt-1.5 text-[14px] leading-[1.5] text-ink-2">{s.body}</p>
-                        <StatusPill status={s.status} className="mt-3" />
-                      </article>
-                    </div>
-                  ) : (
-                    <div key={s.n} aria-hidden />
-                  ),
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
+                  <p className="mt-6 text-[14px] font-semibold text-[var(--pub-forest)]">{s.who}</p>
+                  <h3 className="mt-2 flex-1 text-[22px] font-bold leading-snug text-ink">{s.title}</h3>
+                  <StatusPill status={s.status} className="mt-5" />
+                </li>
+              )
+            })}
+          </ol>
+        </Container>
+      </section>
 
-        {/* Mobile and tablet: the same steps in order, tagged by role */}
-        <ol className="mt-10 flex flex-col gap-4 lg:hidden">
-          {FLOW.map((s) => {
-            const lane = LANES.find((l) => l.role === s.role)!
-            return (
-              <li key={s.n} className="grid grid-cols-[40px_minmax(0,1fr)] gap-4">
-                <span className="tabular grid size-10 place-items-center rounded-full bg-[var(--pub-forest)] text-[15px] font-bold text-white">{s.n}</span>
-                <article className="rounded-lg border border-line bg-panel p-4">
-                  <p className="flex items-center gap-2 text-[13px] font-semibold text-[var(--pub-forest)]">
-                    <lane.icon aria-hidden className="size-4" />
-                    {lane.label}
-                  </p>
-                  <h3 className="mt-1 text-[17px] font-bold text-ink">{s.title}</h3>
-                  <p className="mt-1 text-[15px] text-ink-2">{s.body}</p>
-                  <StatusPill status={s.status} className="mt-3" />
-                </article>
-              </li>
-            )
-          })}
-        </ol>
-      </Band>
-
-      {/* Geofencing, slide 3 */}
-      <Band tone="field" labelledBy="geofence-title">
-        <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-center lg:gap-16">
+      {/* Service areas */}
+      <section aria-labelledby="areas-title" className="bg-[var(--pub-warm)] py-24 lg:py-28">
+        <Container className="grid items-center gap-14 lg:grid-cols-[minmax(0,0.7fr)_minmax(0,1.3fr)] lg:gap-[5vw]">
           <div>
-            <div className="flex flex-wrap items-center gap-3">
-              <Eyebrow>Inside steps 1 to 4</Eyebrow>
-              <StatusPill status="planned" />
-            </div>
-            <Heading id="geofence-title" className="mt-3" title="How the geofence ties the resident to the truck." />
-            <ol className="mt-8 flex flex-col gap-4">
-              {GEOFENCE_STEPS.map((s, i) => (
-                <li key={s.title} className="grid grid-cols-[32px_minmax(0,1fr)] gap-4">
-                  <span className="tabular grid size-8 place-items-center rounded-full border-2 border-[var(--pub-forest)] text-[13px] font-bold text-[var(--pub-forest)]">{i + 1}</span>
-                  <div>
-                    <h3 className="text-[17px] font-bold text-ink">{s.title}</h3>
-                    <p className="mt-0.5 text-[15px] leading-[1.5] text-ink-2">{s.desc || GEOFENCE_DETAIL[i]}</p>
-                  </div>
+            <StatusPill status="planned" />
+            <h2 id="areas-title" className="mt-6 text-[clamp(30px,3.2vw,48px)] font-bold leading-[1.08] tracking-[-0.015em] text-ink">
+              Collection, organised by area.
+            </h2>
+            <p className="mt-5 max-w-[440px] text-[19px] leading-[1.6] text-ink-2">When the crew reaches an area with a request, residents there know it is near.</p>
+          </div>
+          <GeofenceMap animated />
+        </Container>
+      </section>
+
+      {/* Today */}
+      <section aria-labelledby="today-title" className="bg-canvas py-24 lg:py-28">
+        <Container className="grid items-center gap-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-[5vw]">
+          <div>
+            <StatusPill status="available" />
+            <h2 id="today-title" className="mt-6 text-[clamp(30px,3.2vw,48px)] font-bold leading-[1.08] tracking-[-0.015em] text-ink">
+              Step four works today.
+            </h2>
+            <ol className="mt-10 grid max-w-[560px] gap-3 sm:grid-cols-2">
+              {TODAY_STEPS.map((t, i) => (
+                <li key={t} className="flex items-center gap-4 rounded-xl border border-line bg-panel px-5 py-4">
+                  <span className="tabular grid size-9 shrink-0 place-items-center rounded-full bg-[var(--pub-mint)] text-[15px] font-bold text-[var(--pub-forest)]">{i + 1}</span>
+                  <span className="text-[16px] font-semibold text-ink">{t}</span>
                 </li>
               ))}
             </ol>
           </div>
-          <GeofenceMap animated className="rounded-xl bg-canvas p-3 shadow-e2" />
-        </div>
-      </Band>
+          <ConsoleCard />
+        </Container>
+      </section>
 
-      {/* What runs today */}
-      <Band labelledBy="today-title">
-        <div className="grid gap-12 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-16">
-          <div>
-            <div className="flex flex-wrap items-center gap-3">
-              <Eyebrow>Step 5, today</Eyebrow>
-              <StatusPill status="available" />
-            </div>
-            <Heading id="today-title" className="mt-3" title="What the municipal console does in this build." body="Without the resident and collector apps, the console works from the collection logs and collector records it holds: a labelled demo dataset stored in your browser." />
-            <Button variant="primary" size="lg" className="mt-8" onClick={openSignIn} icon={<ArrowRight aria-hidden className="size-4" />} trailingIcon>
-              Sign in to the console
-            </Button>
-          </div>
-          <ol className="overflow-hidden rounded-xl border border-line">
-            {WORKFLOW.map((s, i) => (
-              <li key={s.title} className="flex items-start gap-4 border-b border-line bg-panel px-6 py-5 last:border-b-0">
-                <span className="tabular mt-0.5 text-[14px] font-bold text-[var(--pub-forest)]">{String(i + 1).padStart(2, '0')}</span>
-                <div className="flex-1">
-                  <h3 className="text-[17px] font-bold text-ink">{s.title}</h3>
-                  <p className="mt-0.5 text-[15px] text-ink-2">{s.body}</p>
-                </div>
-                <span className="hidden shrink-0 rounded-md bg-muted px-2.5 py-1 text-[12px] font-medium text-ink-2 sm:block">{s.where}</span>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </Band>
-
-      <section className="border-t border-line bg-[var(--pub-field)]">
-        <Container className="flex flex-col items-start justify-between gap-6 py-12 lg:flex-row lg:items-center">
-          <p className="max-w-2xl text-[clamp(22px,2.4vw,30px)] font-bold leading-tight text-ink">See the resident app concept and the console side by side.</p>
+      <section className="pub-dark">
+        <Container className="flex flex-col items-start justify-between gap-6 py-16 lg:flex-row lg:items-center">
+          <p className="max-w-2xl text-[clamp(24px,2.6vw,36px)] font-bold leading-tight text-[var(--pub-on-dark)]">See every part of EcoTrack.</p>
           <ButtonLink to="/preview" variant="primary" size="lg" icon={<ArrowRight aria-hidden className="size-4" />} trailingIcon>
-            Open the preview
+            See the product
           </ButtonLink>
         </Container>
       </section>

@@ -3,7 +3,9 @@ import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxi
 import { CalendarRange, Clock3, Download, Filter, MapPin, SearchX } from 'lucide-react'
 import type { CollectionLog, LogStatus } from '@/types/domain'
 import { useData } from '@/store/StoreProvider'
-import { countByStatus, inRange, startOfDay, type DateRange } from '@/store/selectors'
+import { countByStatus, inRange, type DateRange } from '@/store/selectors'
+import { statusSeries } from '@/lib/series'
+import { ChartUnderConstruction } from '@/components/feedback/ConstructionArt'
 import { useNow } from '@/hooks/useNow'
 import { useTokens } from '@/hooks/useTokens'
 import { EmptyState, ModuleNotice, Page, Panel, PanelHeader } from '@/components/layout/PageHeader'
@@ -69,7 +71,7 @@ export default function ReportsPage() {
     >
       {noLogs ? (
         <Panel fill label={REPORTS.title}>
-          <ModuleNotice icon={<Clock3 aria-hidden className="size-5" />} title={REPORTS.notice.title} body={REPORTS.notice.body} status={REPORTS.notice.status} />
+          <ModuleNotice icon={<Clock3 aria-hidden className="size-5" />} art={<ChartUnderConstruction className="h-auto w-full" />} title={REPORTS.notice.title} body={REPORTS.notice.body} status={REPORTS.notice.status} />
         </Panel>
       ) : (
         <>
@@ -77,7 +79,7 @@ export default function ReportsPage() {
           <div
             role="search"
             aria-label="Filter collection logs"
-            className={cn('grid shrink-0 gap-3 rounded-lg border border-line bg-panel p-4 shadow-e1 sm:grid-cols-2', filtersActive ? 'lg:grid-cols-[minmax(0,1.5fr)_repeat(3,minmax(0,1fr))_auto]' : 'lg:grid-cols-[minmax(0,1.5fr)_repeat(3,minmax(0,1fr))]')}
+            className={cn('grid shrink-0 gap-3 rounded-xl border border-line bg-panel p-3 shadow-e1 sm:grid-cols-2', filtersActive ? 'lg:grid-cols-[minmax(0,1.5fr)_repeat(3,minmax(0,1fr))_auto]' : 'lg:grid-cols-[minmax(0,1.5fr)_repeat(3,minmax(0,1fr))]')}
           >
             <SearchInput label="Search address or ID" value={query} onChange={setQuery} placeholder={REPORTS.search} />
             <SelectField label="Date range" icon={<CalendarRange aria-hidden className="size-4" />} value={range} onChange={(v) => setRange(v as DateRange)} options={(Object.keys(RANGE_LABEL) as DateRange[]).map((k) => ({ value: k, label: RANGE_LABEL[k] }))} />
@@ -103,27 +105,27 @@ export default function ReportsPage() {
             )}
           </div>
 
-          <div className="grid gap-5 lg:min-h-[420px] lg:flex-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)] lg:gap-6">
+          <div className="grid gap-4 lg:min-h-[420px] lg:flex-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.7fr)]">
             {/* Summary + trend */}
             <Panel label="Summary" fill>
               <PanelHeader title="Summary" meta={RANGE_LABEL[range]} />
               <dl className="grid shrink-0 grid-cols-4 border-b border-line">
-                <div className="bg-muted px-4 py-4 sm:px-5">
+                <div className="bg-muted px-4 py-3 sm:px-5">
                   <dt className="text-[13px] font-medium text-ink-2">{REPORTS.summary.total}</dt>
-                  <dd className="tabular mt-1.5 text-[28px] font-bold leading-none text-ink">{filtered.length}</dd>
+                  <dd className="tabular mt-1 text-[26px] font-bold leading-none text-ink">{filtered.length}</dd>
                 </div>
                 {summary.map((s) => (
-                  <div key={s.label} className="border-l border-line px-4 py-4 sm:px-5">
+                  <div key={s.label} className="border-l border-line px-4 py-3 sm:px-5">
                     <dt className="flex items-center gap-1.5 text-[13px] font-medium text-ink-2">
                       <span aria-hidden className={cn('size-1.5 rounded-full', toneDot(s.tone))} />
                       {s.label}
                     </dt>
-                    <dd className={cn('tabular mt-1.5 text-[28px] font-bold leading-none', s.value ? toneText(s.tone) : 'text-ink')}>{s.value}</dd>
+                    <dd className={cn('tabular mt-1 text-[26px] font-bold leading-none', s.value ? toneText(s.tone) : 'text-ink')}>{s.value}</dd>
                   </div>
                 ))}
               </dl>
-              <div className="flex min-h-[240px] flex-1 flex-col px-4 pb-4 pt-5">
-                <p className="px-2 text-[14px] font-semibold text-ink">{range === 'today' ? 'Logs by hour' : 'Logs by day'}, stacked by status</p>
+              <div className="flex min-h-[240px] flex-1 flex-col px-4 pb-3 pt-4">
+                <p className="px-2 text-[13.5px] font-semibold text-ink">{range === 'today' ? 'Logs by hour' : 'Logs by day'}, stacked by status</p>
                 <div className="min-h-0 flex-1">
                   <TrendChart logs={filtered} range={range} now={now} />
                 </div>
@@ -148,28 +150,9 @@ export default function ReportsPage() {
   )
 }
 
-const dayFmt = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' })
-
 function TrendChart({ logs, range, now }: { logs: CollectionLog[]; range: DateRange; now: number }) {
   const t = useTokens()
-  const data = useMemo(() => {
-    const buckets = new Map<string, { label: string; completed: number; pending: number; missed: number; order: number }>()
-    if (range === 'today') {
-      for (let h = 0; h <= new Date(now).getHours(); h++) buckets.set(String(h), { label: `${String(h).padStart(2, '0')}:00`, completed: 0, pending: 0, missed: 0, order: h })
-      for (const l of logs) buckets.get(String(new Date(l.createdAt).getHours()))![l.status]++
-    } else {
-      const days = range === '7d' ? 7 : range === '30d' ? 30 : Math.max(1, Math.ceil((startOfDay(now) - Math.min(...logs.map((l) => startOfDay(l.createdAt)), startOfDay(now))) / 86_400_000) + 1)
-      for (let i = days - 1; i >= 0; i--) {
-        const d = startOfDay(now) - i * 86_400_000
-        buckets.set(String(d), { label: dayFmt.format(d), completed: 0, pending: 0, missed: 0, order: d })
-      }
-      for (const l of logs) {
-        const b = buckets.get(String(startOfDay(l.createdAt)))
-        if (b) b[l.status]++
-      }
-    }
-    return [...buckets.values()].sort((a, b) => a.order - b.order)
-  }, [logs, range, now])
+  const data = useMemo(() => statusSeries(logs, range, now), [logs, range, now])
 
   if (logs.length === 0) return <p className="grid h-full place-items-center text-[13px] text-ink-3">No logs in this view.</p>
   return (

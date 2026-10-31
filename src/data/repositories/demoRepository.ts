@@ -1,6 +1,7 @@
 import type { AppData } from '@/store/types'
 import type { Collector, CollectionLog } from '@/types/domain'
 import { SHIFT_DEFAULTS } from '@/content/original'
+import { normalizeCollectors, normalizeLogs } from '@/data/normalize'
 
 /**
  * Data-access boundary. The original product read its records from a REST
@@ -135,7 +136,15 @@ export const localStorageRepository: DataRepository = {
     try {
       const parsed: unknown = JSON.parse(text)
       const problem = validate(parsed)
-      return problem ? { status: 'invalid', reason: problem } : { status: 'ok', data: parsed as AppData }
+      if (problem) return { status: 'invalid', reason: problem }
+      // Keep only records the UI can trust; drop malformed or duplicate entries.
+      const data = parsed as AppData
+      const { logs, report: logReport } = normalizeLogs(data.logs)
+      const { collectors, report: collectorReport } = normalizeCollectors(data.collectors)
+      if (import.meta.env.DEV && logReport.rejected + logReport.duplicates + collectorReport.rejected + collectorReport.duplicates > 0) {
+        console.warn('EcoTrack: dropped stored records that failed validation', { logs: logReport, collectors: collectorReport })
+      }
+      return { status: 'ok', data: { ...data, logs, collectors } }
     } catch {
       return { status: 'invalid', reason: 'unreadable JSON' }
     }

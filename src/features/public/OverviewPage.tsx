@@ -1,327 +1,190 @@
-import { ArrowRight, Check } from 'lucide-react'
-import { Button } from '@/components/ui/Button'
+import { Link } from 'react-router'
+import { ArrowRight, ChevronRight, ClipboardCheck, LayoutGrid, Map } from 'lucide-react'
 import { ButtonLink } from '@/components/ui/ButtonLink'
-import { usePublicActions } from './PublicLayout'
-import {
-  AUDIENCES,
-  CLOSING_LINE,
-  COLLECTOR_FEATURES,
-  CONSOLE_FEATURES,
-  COST_ADVANTAGES,
-  IMPACT,
-  MACRO_STATS,
-  MARKET_SCOPE,
-  OUTCOMES_KPIS,
-  PRINCIPLES,
-  PROBLEMS,
-  PRODUCT_LINE,
-  RESIDENT_FEATURES,
-  TEAM_CREDIT,
-} from './site/content'
-import { Band, Container, Eyebrow, Heading, StatusPill } from './site/ui'
-import { CitySkylineBackdrop, ConsoleCard, FinancialImpactWidget, GeofenceMap, ResidentPhone } from './site/visuals'
+import { HERO, MISSION, NEXT, PRINCIPLES, PRODUCT_LINE } from './site/content'
+import { enquiryChannel } from './site/config'
+import { ContactForm } from './site/contact'
+import { HeroShowcase } from './site/showcase'
+import { ConsoleDemo, PhonePair, StatusKey, StreetAccounted, StreetRecord } from './site/stories'
+import { Container, Eyebrow, StatusPill } from './site/ui'
 
-const WHAT_THEY_DO: Record<(typeof AUDIENCES)[number]['id'], string[]> = {
-  residents: RESIDENT_FEATURES.map((f) => f.title),
-  collectors: COLLECTOR_FEATURES.map((f) => f.title),
-  municipal: CONSOLE_FEATURES.filter((f) => f.status === 'available').map((f) => f.title),
-}
+const H2 = 'text-[clamp(32px,3.6vw,56px)] font-bold leading-[1.05] tracking-[-0.02em]'
 
 export default function OverviewPage() {
-  const { openSignIn } = usePublicActions()
+  const canContact = enquiryChannel() !== null
 
   return (
     <>
-      {/* Hero: The promise and the three-stakeholder bridge */}
-      <section className="relative overflow-hidden border-b border-line bg-canvas">
-        <div aria-hidden className="pub-grid absolute inset-y-0 right-0 hidden w-[54%] [mask-image:linear-gradient(to_right,transparent,black_25%)] lg:block" />
-        <CitySkylineBackdrop />
-        <Container className="relative grid items-center gap-12 py-12 sm:py-16 lg:min-h-[calc(100dvh-68px)] lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:gap-14 lg:py-16">
+      {/* Hero: the message, then the product family it describes */}
+      <section className="pub-hero relative overflow-hidden">
+        <div aria-hidden className="pub-streets absolute inset-y-0 right-0 w-full [mask-image:radial-gradient(ellipse_65%_80%_at_72%_50%,black_15%,transparent_75%)] lg:w-[70%]" />
+        <Container className="relative grid items-center gap-12 pb-16 pt-12 sm:pt-16 lg:min-h-[min(calc(100dvh-68px),780px)] lg:grid-cols-[minmax(0,0.38fr)_minmax(0,0.62fr)] lg:gap-[3.5vw] lg:py-[clamp(32px,5vh,64px)]">
           <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2.5">
-              <Eyebrow>EcoTrack · {PRODUCT_LINE}</Eyebrow>
-              <span className="rounded-md border border-line bg-muted px-2 py-0.5 text-[11px] font-semibold text-ink-3">
-                {TEAM_CREDIT}
-              </span>
-            </div>
-
-            <h1 className="mt-4 text-[clamp(36px,4.4vw,60px)] font-extrabold leading-[1.05] tracking-tight text-ink">
-              Right pickup, at the right place, <span className="text-[var(--pub-forest)]">at the right time.</span>
+            <Eyebrow dark>{PRODUCT_LINE}</Eyebrow>
+            <h1 className="mt-6 text-[clamp(44px,4.2vw,74px)] font-bold leading-[1] tracking-[-0.025em] text-[var(--pub-on-dark)]">
+              {HERO.title[0]} <span className="text-[var(--pub-leaf-text)]">{HERO.title[1]}</span>
             </h1>
-
-            <p className="mt-5 max-w-[560px] text-[17px] leading-[1.6] text-ink-2">
-              EcoTrack connects the three people behind every municipal collection: the resident who requests a pickup, the collector on the route, and the city authority answering for the result.
-            </p>
-
-            <div className="mt-8 flex flex-wrap gap-3">
-              <ButtonLink to="/how-it-works" variant="primary" size="lg" icon={<ArrowRight aria-hidden className="size-4" />} trailingIcon>
-                See how it works
+            <p className="mt-7 max-w-[520px] text-[clamp(17px,1.15vw,20px)] leading-[1.6] text-[var(--pub-on-dark-2)]">{HERO.body}</p>
+            <div className="mt-9 flex flex-wrap gap-3">
+              {canContact ? (
+                <a href="#contact" className="inline-flex h-12 items-center gap-2 rounded-lg bg-accent px-6 text-[15px] font-medium text-accent-ink transition-colors hover:bg-accent-hover">
+                  Request a demo
+                  <ArrowRight aria-hidden className="size-4" />
+                </a>
+              ) : (
+                <ButtonLink to="/preview" variant="primary" size="lg" icon={<ArrowRight aria-hidden className="size-4" />} trailingIcon>
+                  See the product
+                </ButtonLink>
+              )}
+              <ButtonLink to={canContact ? '/preview' : '/how-it-works'} variant="light" size="lg">
+                {canContact ? 'See the product' : 'How it works'}
               </ButtonLink>
-              <Button variant="secondary" size="lg" onClick={openSignIn}>
-                Sign in to the console
-              </Button>
             </div>
-
-            {/* Macro Stats from Slide 2 */}
-            <div className="mt-10 grid max-w-[580px] grid-cols-3 divide-x divide-line rounded-xl border border-line bg-panel p-2 shadow-xs">
-              {MACRO_STATS.map((s) => (
-                <div key={s.label} className="px-3.5 py-2">
-                  <p className="tabular text-[20px] sm:text-[24px] font-extrabold text-[var(--pub-forest)]">{s.value}</p>
-                  <p className="text-[12px] font-semibold text-ink leading-tight">{s.label}</p>
-                  <p className="mt-0.5 text-[10px] text-ink-3 leading-tight hidden sm:block">{s.note}</p>
-                </div>
-              ))}
-            </div>
-
-            {/* What exists today indicators */}
-            <ul aria-label="Product readiness" className="mt-6 grid max-w-[580px] gap-px overflow-hidden rounded-xl border border-line bg-line sm:grid-cols-3">
-              {AUDIENCES.map((a) => (
-                <li key={a.id} className="flex flex-col gap-1.5 bg-panel px-3.5 py-2.5">
-                  <span className="text-[13px] font-semibold text-ink">{a.product}</span>
-                  <StatusPill status={a.status} className="self-start text-[11px]" />
-                </li>
-              ))}
-            </ul>
+            <dl className="mt-10 grid max-w-[460px] grid-cols-2 gap-px overflow-hidden rounded-xl border border-[var(--pub-dark-line)] bg-[var(--pub-dark-line)] text-[14px]">
+              <div className="bg-[var(--pub-charcoal)] px-4 py-3">
+                <dt className="text-[var(--pub-on-dark-3)]">Available now</dt>
+                <dd className="mt-0.5 font-semibold text-[var(--pub-on-dark)]">Municipal console</dd>
+              </div>
+              <div className="bg-[var(--pub-charcoal)] px-4 py-3">
+                <dt className="text-[var(--pub-on-dark-3)]">Planned</dt>
+                <dd className="mt-0.5 font-semibold text-[var(--pub-on-dark)]">Resident and crew apps</dd>
+              </div>
+            </dl>
           </div>
 
-          <HeroStage />
+          <HeroShowcase />
         </Container>
       </section>
 
-      {/* Problem Statement — Slide 2 */}
-      <Band labelledBy="problems-title">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <Heading
-            id="problems-title"
-            eyebrow="The problem · Slide 2"
-            title="Waste collection breaks down in five places."
-            body="Manual scheduling, disconnected teams, and lack of real-time visibility turn urban waste management into a costly, inefficient crisis."
-          />
-          <div className="rounded-xl border border-crit-soft bg-crit-soft/30 px-5 py-3 text-right">
-            <span className="text-[12px] font-bold uppercase tracking-wider text-crit-text">National Scale Deficit</span>
-            <p className="tabular text-[26px] font-black text-crit-text">25% Missed</p>
-            <p className="text-[12px] text-ink-3">Pickups skipped under blind rounds</p>
+      {/* The everyday question */}
+      <section aria-labelledby="question-title" className="bg-[var(--pub-warm)] py-24 lg:py-32">
+        <Container>
+          <div className="mb-14 grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-end lg:gap-16">
+            <h2 id="question-title" className={`${H2} text-ink`}>
+              Was it collected?
+            </h2>
+            <p className="max-w-[560px] text-[19px] leading-[1.6] text-ink-2">Missed pickups go unnoticed until the waste piles up. EcoTrack gives every street a record.</p>
           </div>
-        </div>
-
-        <ol className="mt-10 grid overflow-hidden rounded-xl border border-line sm:grid-cols-2 lg:grid-cols-5">
-          {PROBLEMS.map((p, i) => (
-            <li
-              key={p.title}
-              className="flex flex-col border-b border-line p-6 last:border-b-0 sm:[&:nth-child(odd)]:border-r lg:border-b-0 lg:border-r lg:last:border-r-0"
-            >
-              <span className="flex items-center justify-between">
-                <span className="grid size-11 place-items-center rounded-full bg-crit-soft text-crit-text">
-                  <p.icon aria-hidden strokeWidth={1.75} className="size-5" />
-                </span>
-                <span className="tabular text-[13px] font-semibold text-ink-3">0{i + 1}</span>
-              </span>
-              <h3 className="mt-5 text-[17px] font-bold text-ink">{p.title}</h3>
-              <p className="mt-2 text-[14px] leading-[1.55] text-ink-2">{p.body}</p>
-            </li>
-          ))}
-        </ol>
-
-        <div className="mt-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-xl bg-muted px-6 py-4 border border-line">
-          <p className="text-[15px] text-ink">
-            <span className="font-bold text-ink">Operational Impact: </span>
-            {IMPACT}
+          <StreetRecord />
+          <div className="mt-6">
+            <StatusKey />
+          </div>
+          <p className="mt-6 flex flex-wrap items-center gap-x-3 gap-y-2 text-[15px] text-ink-2">
+            <StatusPill status="planned" />
+            Residents checking their own pickup is part of the planned resident app.
+            <Link to="/preview?for=resident" className="inline-flex items-center gap-1 font-semibold text-[var(--pub-forest)] hover:underline">
+              See the concept
+              <ChevronRight aria-hidden className="size-4" />
+            </Link>
           </p>
-          <span className="shrink-0 rounded-md bg-panel px-3 py-1 text-[13px] font-semibold text-crit-text border border-line">
-            ₹22.5L monthly municipal drain per city
-          </span>
-        </div>
-      </Band>
+        </Container>
+      </section>
 
-      {/* Financial Impact Model — Slide 7 & 8 */}
-      <Band tone="field" labelledBy="financial-title">
-        <Heading
-          id="financial-title"
-          eyebrow="Financial Impact & Cost Advantage · Slides 7 & 8"
-          title="From daily operational drain to measurable municipal savings."
-          body="Eliminating blind rounds and sensor hardware drastically reduces re-dispatch expenses and truck fuel consumption."
-        />
-
-        <div className="mt-10">
-          <FinancialImpactWidget />
-        </div>
-
-        {/* 4 Cost Advantages */}
-        <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {COST_ADVANTAGES.map((c) => (
-            <div key={c.title} className="rounded-xl border border-line bg-panel p-5 shadow-xs">
-              <span className="grid size-10 place-items-center rounded-lg bg-[var(--pub-mint)] text-[var(--pub-forest)]">
-                <c.icon aria-hidden strokeWidth={1.75} className="size-5" />
-              </span>
-              <h4 className="mt-3.5 text-[16px] font-bold text-ink">{c.title}</h4>
-              <p className="mt-1 text-[13px] leading-relaxed text-ink-2">{c.body}</p>
+      {/* The product */}
+      <section aria-labelledby="console-title" className="bg-[var(--pub-warm)] px-2 pb-2 sm:px-3 sm:pb-3 lg:px-4 lg:pb-4">
+        <div className="pub-night relative overflow-hidden rounded-[20px] py-24 sm:rounded-[28px] lg:py-32">
+          <div aria-hidden className="pub-streets absolute inset-0 [mask-image:linear-gradient(to_bottom,black,transparent_60%)]" />
+          <Container className="relative">
+            <div className="mb-12 flex flex-wrap items-end justify-between gap-8">
+              <div className="max-w-[760px]">
+                <h2 id="console-title" className={`${H2} text-[var(--pub-on-dark)]`}>
+                  Your whole collection day, <span className="text-[var(--pub-leaf-text)]">on one screen.</span>
+                </h2>
+              </div>
+              <ul className="flex flex-wrap gap-x-7 gap-y-3 text-[16px] text-[var(--pub-on-dark-2)]">
+                {[
+                  { icon: LayoutGrid, text: 'Collections and misses' },
+                  { icon: Map, text: 'Crews on the map' },
+                  { icon: ClipboardCheck, text: 'A record you can export' },
+                ].map((c) => (
+                  <li key={c.text} className="inline-flex items-center gap-2.5">
+                    <c.icon aria-hidden strokeWidth={1.75} className="size-5 text-[var(--pub-leaf-text)]" />
+                    {c.text}
+                  </li>
+                ))}
+              </ul>
             </div>
-          ))}
-        </div>
-      </Band>
-
-      {/* Target Market Personas — Slide 4 */}
-      <Band labelledBy="people-title">
-        <div className="flex flex-wrap items-end justify-between gap-6">
-          <Heading
-            id="people-title"
-            eyebrow="Target Personas · Slide 4"
-            title="One coordinated platform. Three distinct stakeholders."
-            body="Every tier of the waste collection loop has dedicated tooling designed for their specific operating environment."
-          />
-          <ButtonLink to="/features" variant="outline" size="lg" icon={<ArrowRight aria-hidden className="size-4" />} trailingIcon>
-            Explore all capabilities
-          </ButtonLink>
-        </div>
-
-        <div className="mt-10 grid gap-6 lg:grid-cols-3">
-          {AUDIENCES.map((a) => (
-            <article key={a.id} className="flex flex-col justify-between rounded-xl border border-line bg-panel p-7 shadow-xs">
-              <div>
-                <div className="flex items-start justify-between gap-3">
-                  <span className="grid size-12 place-items-center rounded-xl bg-[var(--pub-mint)] text-[var(--pub-forest)]">
-                    <a.icon aria-hidden strokeWidth={1.75} className="size-6" />
-                  </span>
-                  <StatusPill status={a.status} />
-                </div>
-                <h3 className="mt-5 text-[21px] font-bold text-ink">{a.name}</h3>
-                <p className="mt-2 text-[14px] leading-[1.55] text-ink-2">{a.need}</p>
-                <div className="mt-4 rounded-lg bg-muted px-3.5 py-2.5 text-[12px] text-ink-2">
-                  <span className="font-semibold text-ink">Deck Focus: </span>
-                  {a.focus}
-                </div>
-              </div>
-
-              <div className="mt-6 border-t border-line pt-4">
-                <p className="text-[12px] font-bold uppercase tracking-wider text-ink-3">{a.product}</p>
-                <ul className="mt-2.5 flex flex-col gap-2">
-                  {WHAT_THEY_DO[a.id].map((t) => (
-                    <li key={t} className="flex items-start gap-2 text-[14px] text-ink">
-                      <Check aria-hidden strokeWidth={2.5} className="mt-0.5 size-4 shrink-0 text-[var(--pub-forest)]" />
-                      <span>{t}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </article>
-          ))}
-        </div>
-
-        {/* Market Scope / Drivers from Slide 4 */}
-        <div className="mt-8 rounded-xl border border-line bg-muted p-6">
-          <p className="text-[13px] font-bold uppercase tracking-wider text-[var(--pub-forest)]">
-            Market Scope & Nationwide Tailwinds (Slide 4)
-          </p>
-          <div className="mt-4 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {MARKET_SCOPE.map((m) => (
-              <div key={m.title}>
-                <h4 className="text-[15px] font-bold text-ink">{m.title}</h4>
-                <p className="mt-1 text-[13px] leading-relaxed text-ink-2">{m.body}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </Band>
-
-      {/* Feasibility & Design Goals — Slide 6 & 10 */}
-      <Band tone="field" labelledBy="principles-title">
-        <div className="grid gap-10 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-16 items-center">
-          <div>
-            <Heading
-              id="principles-title"
-              eyebrow="Implementation Feasibility · Slide 6"
-              title="Engineered for real-world Indian city constraints."
-              body="No expensive IoT hardware, zero custom sensors, and resilient under poor mobile network coverage. Built to scale rapidly across municipal corporations."
-            />
-            <div className="mt-6 rounded-xl border border-line bg-panel p-5">
-              <span className="text-[12px] font-bold uppercase tracking-wider text-[var(--pub-forest)]">
-                Slide 10 · Adoption Strategy
-              </span>
-              <p className="mt-1 text-[14px] leading-relaxed text-ink-2">
-                Start with a single municipal zone pilot to prove verifiable collection rate and cost KPIs, then expand corporately under established municipal contracts.
+            <ConsoleDemo />
+            <div className="mt-8 flex flex-wrap items-center justify-between gap-4">
+              <p className="flex items-center gap-3 text-[15px] text-[var(--pub-on-dark-2)]">
+                <StatusPill status="available" dark /> Working today, shown here with sample data.
               </p>
+              <Link to="/features" className="inline-flex items-center gap-1.5 text-[16px] font-semibold text-[var(--pub-leaf-text)] hover:underline">
+                What the console does
+                <ChevronRight aria-hidden className="size-4" />
+              </Link>
             </div>
-          </div>
-
-          <ul className="grid gap-px overflow-hidden rounded-xl border border-line bg-line sm:grid-cols-2 shadow-xs">
-            {PRINCIPLES.map((p) => (
-              <li key={p.title} className="bg-panel p-6">
-                <p.icon aria-hidden strokeWidth={1.75} className="size-6 text-[var(--pub-forest)]" />
-                <h4 className="mt-3.5 text-[17px] font-bold text-ink">{p.title}</h4>
-                <p className="mt-1.5 text-[14px] leading-[1.5] text-ink-2">{p.body}</p>
-              </li>
-            ))}
-          </ul>
+          </Container>
         </div>
-      </Band>
+      </section>
 
-      {/* Slide 9 Target Outcomes & Measurable KPIs */}
-      <Band labelledBy="outcomes-title">
-        <Heading
-          id="outcomes-title"
-          eyebrow="Target Outcomes · Slide 9"
-          title="Verifiable efficiency improvements across the city."
-          body="Projected outcomes achieved by closing the loop between citizen request and verified municipal collection."
-        />
-        <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {OUTCOMES_KPIS.map((o) => (
-            <div key={o.label} className="rounded-xl border border-line bg-panel p-6 shadow-xs flex items-start gap-4">
-              <span className="grid size-12 shrink-0 place-items-center rounded-xl bg-[var(--pub-mint)] text-[var(--pub-forest)]">
-                <o.icon aria-hidden strokeWidth={1.75} className="size-6" />
-              </span>
-              <div>
-                <p className="tabular text-[24px] font-extrabold text-[var(--pub-forest)]">{o.metric}</p>
-                <h4 className="text-[16px] font-bold text-ink">{o.label}</h4>
-                <p className="mt-1 text-[13px] leading-relaxed text-ink-2">{o.desc}</p>
+      {/* What comes next */}
+      <section aria-labelledby="next-title" className="overflow-hidden bg-[var(--pub-field)] py-24 lg:py-32">
+        <Container className="grid items-center gap-16 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-[5vw]">
+          <div>
+            <StatusPill status="planned" />
+            <h2 id="next-title" className={`${H2} mt-6 text-ink`}>
+              Residents and crews, <span className="text-[var(--pub-forest)]">in the loop.</span>
+            </h2>
+            <p className="mt-6 max-w-[520px] text-[19px] leading-[1.6] text-ink-2">Residents will know when the crew is near. Crews will see the next stop and confirm it on the spot.</p>
+            <div className="mt-10 grid max-w-[520px] gap-8 sm:grid-cols-2">
+              {[
+                { who: 'Resident app', items: NEXT.resident },
+                { who: 'Crew app', items: NEXT.crew },
+              ].map((g) => (
+                <div key={g.who}>
+                  <p className="text-[15px] font-semibold text-ink">{g.who}</p>
+                  <ul className="mt-3 flex flex-col gap-2 text-[15px] text-ink-2">
+                    {g.items.map((t) => (
+                      <li key={t} className="flex gap-2.5">
+                        <span aria-hidden className="mt-2 size-1.5 shrink-0 rounded-full bg-[var(--pub-leaf)]" />
+                        {t}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+            <Link to="/preview?for=resident" className="mt-10 inline-flex items-center gap-1.5 text-[16px] font-semibold text-[var(--pub-forest)] hover:underline">
+              See the app concepts
+              <ChevronRight aria-hidden className="size-4" />
+            </Link>
+          </div>
+          <PhonePair />
+        </Container>
+      </section>
+
+      {/* The ambition, and the next step */}
+      <section id="contact" aria-labelledby="mission-title" className="pub-dark relative scroll-mt-[68px] overflow-hidden py-24 lg:py-32">
+        <div aria-hidden className="pub-streets absolute inset-0 [mask-image:radial-gradient(ellipse_at_20%_30%,black_10%,transparent_65%)]" />
+        <Container className="relative grid items-center gap-16 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)] lg:gap-[5vw]">
+          <div>
+            <h2 id="mission-title" className="max-w-[900px] text-[clamp(38px,4.6vw,76px)] font-bold leading-[1.02] tracking-[-0.025em] text-[var(--pub-on-dark)]">
+              {MISSION.split('. ')[0]}. <span className="text-[var(--pub-leaf-text)]">{MISSION.split('. ')[1]}</span>
+            </h2>
+            <p className="mt-7 max-w-[560px] text-[19px] leading-[1.6] text-[var(--pub-on-dark-2)]">{canContact ? 'Tell us about your city. We would like to show you EcoTrack and hear what your teams need.' : 'See EcoTrack with sample data, or sign in to the console.'}</p>
+            {!canContact && (
+              <div className="mt-10">
+                <ButtonLink to="/preview" variant="primary" size="lg" icon={<ArrowRight aria-hidden className="size-4" />} trailingIcon>
+                  See the product
+                </ButtonLink>
               </div>
+            )}
+            <div className="mt-14 border-t border-[var(--pub-dark-line)] pt-8">
+              <p className="text-[14px] text-[var(--pub-on-dark-3)]">Design goals</p>
+              <ul className="mt-4 flex flex-wrap gap-x-8 gap-y-4">
+                {PRINCIPLES.map((p) => (
+                  <li key={p.label} className="inline-flex items-center gap-2.5 text-[16px] font-medium text-[var(--pub-on-dark)]">
+                    <p.icon aria-hidden strokeWidth={1.75} className="size-5 text-[var(--pub-leaf-text)]" />
+                    {p.label}
+                  </li>
+                ))}
+              </ul>
             </div>
-          ))}
-        </div>
-      </Band>
-
-      {/* Closing Call to Action */}
-      <section className="border-t border-line bg-canvas">
-        <Container className="flex flex-col items-start justify-between gap-6 py-14 lg:flex-row lg:items-center">
-          <div className="max-w-2xl">
-            <p className="text-[clamp(22px,2.4vw,32px)] font-bold leading-tight text-ink">
-              Experience the EcoTrack platform across every touchpoint.
-            </p>
-            <p className="mt-2 text-[15px] leading-relaxed text-ink-2">
-              {CLOSING_LINE}
-            </p>
           </div>
-          <div className="flex flex-wrap gap-3">
-            <ButtonLink to="/preview" variant="primary" size="lg" icon={<ArrowRight aria-hidden className="size-4" />} trailingIcon>
-              Open interactive preview
-            </ButtonLink>
-            <Button variant="secondary" size="lg" onClick={openSignIn}>
-              Sign in to console
-            </Button>
-          </div>
+          {canContact ? <ContactForm /> : <StreetAccounted />}
         </Container>
       </section>
     </>
   )
 }
-
-/** Geofence concept map, with resident app concept beside it and real console beneath */
-function HeroStage() {
-  return (
-    <div className="relative min-w-0 lg:pb-[140px] lg:pl-[120px]">
-      <div>
-        <GeofenceMap legend={false} animated />
-        <p className="mt-2 text-right text-[12px] text-ink-3">Collector geofencing radar · Deck Slide 3</p>
-      </div>
-      <div className="mt-8 flex flex-col items-center gap-6 sm:flex-row sm:items-end lg:mt-0">
-        <ResidentPhone className="lg:absolute lg:-left-4 lg:top-10 lg:w-[208px]" />
-        <div className="w-full min-w-0 lg:absolute lg:bottom-0 lg:right-0 lg:w-[74%]">
-          <ConsoleCard />
-          <p className="mt-2 flex items-center gap-2 text-[12px] text-ink-3">
-            <StatusPill status="available" /> Municipal console · Live interactive demo data
-          </p>
-        </div>
-      </div>
-    </div>
-  )
-}
-

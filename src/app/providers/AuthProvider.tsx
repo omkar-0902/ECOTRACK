@@ -1,10 +1,11 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react'
 import type { User } from '@/types/domain'
-import { restoreSession, signIn as authSignIn, signOut as authSignOut } from '@/services/auth'
+import { restoreSession, signIn as authSignIn, signOut as authSignOut, signUp as authSignUp } from '@/services/auth'
 
 interface AuthContextValue {
   user: User | null
   signIn: (email: string, key: string, remember: boolean) => Promise<User>
+  signUp: (details: { name: string; email: string; password: string }, remember: boolean) => Promise<User>
   signOut: () => void
 }
 
@@ -17,11 +18,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(u)
     return u
   }, [])
+  const signUp = useCallback(async (details: { name: string; email: string; password: string }, remember: boolean) => {
+    const u = await authSignUp(details, remember)
+    setUser(u)
+    return u
+  }, [])
   const signOut = useCallback(() => {
     authSignOut()
     setUser(null)
   }, [])
-  const value = useMemo(() => ({ user, signIn, signOut }), [user, signIn, signOut])
+  const value = useMemo(() => ({ user, signIn, signUp, signOut }), [user, signIn, signUp, signOut])
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
