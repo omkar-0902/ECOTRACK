@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import { X } from 'lucide-react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { cn } from '@/lib/cn'
-import { IconButton, Button } from './Button'
+import { IconButton } from './Button'
 
 let openCount = 0
 function useScrollLock(active: boolean) {
@@ -29,15 +29,14 @@ interface BaseProps {
   className?: string
 }
 
-function Surface({ onClose, title, description, children, footer, className, variant }: Omit<BaseProps, 'open'> & { variant: 'dialog' | 'drawer'; size?: string }) {
+function Surface({ onClose, title, description, children, footer, className }: Omit<BaseProps, 'open'>) {
   const ref = useRef<HTMLDivElement>(null)
   const titleId = useId()
   const descId = useId()
   useFocusTrap(ref, true, onClose)
   useScrollLock(true)
-  const isDrawer = variant === 'drawer'
   return (
-    <div className={cn('fixed inset-0 z-[1000] flex', isDrawer ? 'justify-end' : 'items-end justify-center sm:items-center sm:p-6')}>
+    <div className="fixed inset-0 z-[1000] flex items-end justify-center sm:items-center sm:p-6">
       <motion.div
         aria-hidden
         className="absolute inset-0 bg-overlay"
@@ -53,13 +52,13 @@ function Surface({ onClose, title, description, children, footer, className, var
         aria-labelledby={titleId}
         aria-describedby={description ? descId : undefined}
         tabIndex={-1}
-        initial={isDrawer ? { x: 48, opacity: 0 } : { y: 24, opacity: 0, scale: 0.98 }}
-        animate={isDrawer ? { x: 0, opacity: 1 } : { y: 0, opacity: 1, scale: 1 }}
-        exit={isDrawer ? { x: 32, opacity: 0, transition: { duration: 0.16 } } : { y: 12, opacity: 0, transition: { duration: 0.14 } }}
+        initial={{ y: 24, opacity: 0, scale: 0.98 }}
+        animate={{ y: 0, opacity: 1, scale: 1 }}
+        exit={{ y: 12, opacity: 0, transition: { duration: 0.14 } }}
         transition={{ type: 'spring', stiffness: 420, damping: 38 }}
         className={cn(
           'relative flex max-h-[100dvh] w-full flex-col bg-panel text-ink shadow-e3 focus:outline-none',
-          isDrawer ? 'h-full max-w-xl border-l border-line-strong' : 'max-h-[92dvh] max-w-lg rounded-t-lg border border-line sm:rounded-lg',
+          'max-h-[92dvh] max-w-lg rounded-t-lg border border-line sm:rounded-lg',
           className,
         )}
       >
@@ -86,52 +85,5 @@ function Surface({ onClose, title, description, children, footer, className, var
 }
 
 export function Dialog({ open, ...rest }: BaseProps) {
-  return createPortal(<AnimatePresence>{open && <Surface key="dialog" variant="dialog" {...rest} />}</AnimatePresence>, document.body)
-}
-
-export function Drawer({ open, ...rest }: BaseProps) {
-  return createPortal(<AnimatePresence>{open && <Surface key="drawer" variant="drawer" {...rest} />}</AnimatePresence>, document.body)
-}
-
-export function ConfirmDialog({
-  open,
-  onClose,
-  onConfirm,
-  title,
-  description,
-  confirmLabel,
-  destructive,
-  loading,
-  children,
-}: {
-  open: boolean
-  onClose: () => void
-  onConfirm: () => void
-  title: string
-  description?: ReactNode
-  confirmLabel: string
-  destructive?: boolean
-  loading?: boolean
-  children?: ReactNode
-}) {
-  return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      title={title}
-      description={description}
-      footer={
-        <>
-          <Button variant="ghost" onClick={onClose} data-autofocus>
-            Cancel
-          </Button>
-          <Button variant={destructive ? 'danger' : 'primary'} onClick={onConfirm} loading={loading}>
-            {confirmLabel}
-          </Button>
-        </>
-      }
-    >
-      {children}
-    </Dialog>
-  )
+  return createPortal(<AnimatePresence>{open && <Surface key="dialog" {...rest} />}</AnimatePresence>, document.body)
 }

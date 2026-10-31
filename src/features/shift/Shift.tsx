@@ -25,17 +25,6 @@ function WindowDot({ w, className }: { w: ShiftWindow; className?: string }) {
   )
 }
 
-/** Status chip for panel headers. */
-export function ShiftWindowBadge() {
-  const { window: w } = useShiftWindow()
-  return (
-    <span className={cn('inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[12px] font-semibold ring-1 ring-inset', w.state === 'within' ? 'bg-ok-soft text-ok-text ring-ok/25' : 'bg-muted text-ink-2 ring-line-strong')}>
-      <WindowDot w={w} />
-      {shiftWindowText(w)}
-    </span>
-  )
-}
-
 /** The timing form: two time fields, a live summary (length, overnight, validation) and the save actions. */
 export function ShiftEditor({ idPrefix, onSaved }: { idPrefix?: string; onSaved?: () => void }) {
   const fieldId = (name: string) => (idPrefix ? `${idPrefix}-${name}` : name)

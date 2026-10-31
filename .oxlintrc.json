@@ -1,9 +1,30 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "ignorePatterns": [".claude/**", "dist/**", "design-system/**"],
+  "plugins": [
+    "react",
+    "typescript",
+    "oxc"
+  ],
+  "ignorePatterns": [
+    ".claude/**",
+    ".agent/**",
+    ".agents/**",
+    ".aider-desk/**",
+    ".gemini/**",
+    ".gsd/**",
+    "adapters/**",
+    "scripts/**",
+    "website_screenshots/**",
+    "dist/**",
+    "design-system/**"
+  ],
   "rules": {
     "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
+    "react/only-export-components": [
+      "warn",
+      {
+        "allowConstantExport": true
+      }
+    ]
   }
 }

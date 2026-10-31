@@ -11,29 +11,4 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
-  build: {
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          // Rollup's shared CommonJS helper must not land in the lazily used leaflet
-          // chunk, or every page would preload the map library just to reach it.
-          if (id.includes('commonjsHelpers')) {
-            return 'vendor-react'
-          }
-          if (id.includes('node_modules/leaflet') || id.includes('node_modules/react-leaflet')) {
-            return 'vendor-leaflet'
-          }
-          if (id.includes('node_modules/lucide-react')) {
-            return 'vendor-icons'
-          }
-          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom') || id.includes('node_modules/react-router')) {
-            return 'vendor-react'
-          }
-          if (id.includes('node_modules/motion')) {
-            return 'vendor-motion'
-          }
-        },
-      },
-    },
-  },
 })

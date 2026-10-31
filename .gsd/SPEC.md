@@ -9,7 +9,7 @@ EcoTRACK is a smart municipal waste management and environmental operations plat
 
 ## Goals
 1. Deliver a world-class, accessible, responsive public web experience across 4 distinct routes (`/overview`, `/features`, `/how-it-works`, `/preview`).
-2. Faithfully represent all product requirements, macro statistics, 5-stage geofencing workflow, and financial models from Team Vamos's proposal deck (`public/EcoTrack_Vamos_v2 2.pptx`).
+2. Faithfully represent all product requirements, macro statistics, 5-stage geofencing workflow, and financial models from Team Vamos's proposal deck (`docs/source/EcoTrack_Vamos_v2 2.pptx`).
 3. Maintain 100% strict isolation of the authenticated post-login application (`/dashboard`, `/tracking`, `/reports`, `/rewards`, `/collectors`, `AppShell.tsx`, `Sidebar.tsx`, auth, and repositories).
 4. Achieve production readiness: full SEO meta tags, social sharing card, dynamic route titles, WCAG 2.1 AA accessibility, and optimized vendor chunking.
 

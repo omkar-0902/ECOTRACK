@@ -2,7 +2,7 @@
  * Public-site copy, written for customers rather than engineers. Kept short on
  * purpose: the product visuals carry most of the story.
  *
- * Sources: the EcoTrack proposal deck (public/EcoTrack_Vamos_v2 2.pptx) for the
+ * Sources: the EcoTrack proposal deck (docs/source/EcoTrack_Vamos_v2 2.pptx) for the
  * product vision, and this repository for what actually works today.
  *
  * Availability vocabulary used everywhere on the public site:

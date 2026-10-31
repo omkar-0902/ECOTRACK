@@ -22,37 +22,6 @@ export function Eyebrow({ children, className, dark }: { children: ReactNode; cl
   )
 }
 
-const TONE = {
-  white: 'bg-canvas',
-  warm: 'bg-[var(--pub-warm)]',
-  field: 'bg-[var(--pub-field)]',
-  dark: 'pub-dark',
-} as const
-
-export function Band({ tone = 'white', children, className, labelledBy, id }: { tone?: keyof typeof TONE; children: ReactNode; className?: string; labelledBy?: string; id?: string }) {
-  return (
-    <section id={id} aria-labelledby={labelledBy} className={cn('py-20 sm:py-24 lg:py-28', TONE[tone], className)}>
-      <Container>{children}</Container>
-    </section>
-  )
-}
-
-export function Heading({ id, eyebrow, title, body, className, dark, center }: { id?: string; eyebrow?: string; title: ReactNode; body?: ReactNode; className?: string; dark?: boolean; center?: boolean }) {
-  return (
-    <div className={cn('max-w-2xl', center && 'mx-auto text-center', className)}>
-      {eyebrow && (
-        <Eyebrow dark={dark} className="mb-4">
-          {eyebrow}
-        </Eyebrow>
-      )}
-      <h2 id={id} className={cn('text-[clamp(30px,3.4vw,44px)] font-bold leading-[1.1] tracking-[-0.01em]', dark ? 'text-[var(--pub-on-dark)]' : 'text-ink')}>
-        {title}
-      </h2>
-      {body && <p className={cn('mt-5 text-[18px] leading-[1.6]', dark ? 'text-[var(--pub-on-dark-2)]' : 'text-ink-2')}>{body}</p>}
-    </div>
-  )
-}
-
 /** "Available now" or "Planned": shown wherever a capability is described. */
 export function StatusPill({ status, className, dark }: { status: Status; className?: string; dark?: boolean }) {
   return status === 'available' ? (

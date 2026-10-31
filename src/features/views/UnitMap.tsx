@@ -8,6 +8,7 @@ import type { LatLngBoundsExpression } from 'leaflet'
 import type { Collector } from '@/types/domain'
 import { unitIcon } from '@/components/maps/markers'
 import { cn } from '@/lib/cn'
+import './unitMap.css'
 
 const TILE_URL = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
 const ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

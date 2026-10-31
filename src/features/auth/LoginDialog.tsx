@@ -11,7 +11,7 @@ import { TextField } from '@/components/ui/Controls'
 import { LOGIN } from '@/content/original'
 import { safeReturnPath } from '@/services/auth'
 import { CAPABILITIES } from '@/content/product'
-import { ContourLines } from '@/features/public/Sections'
+import { ContourLines } from './ContourLines'
 import { cn } from '@/lib/cn'
 
 export type AuthMode = 'signin' | 'signup'

@@ -14,7 +14,7 @@ and the code disagree, the code wins.
 | Session | A small JSON marker (`{ email, at }`) in `localStorage` ("remember device") or `sessionStorage`, key `ecotrack:session`. No token, no expiry, no server check. | `src/services/auth.ts` |
 | Data | Everything lives in the browser's `localStorage` (key `ecotrack:data`), seeded with a labelled demo dataset. | `src/data/repositories/demoRepository.ts` |
 | Network calls | None to an EcoTrack API. The only requests are OpenStreetMap map tiles and, if configured, the public-site enquiry form endpoint. | `src/features/views/UnitMap.tsx`, `src/features/public/site/contact.tsx` |
-| Environment variables | None are read. | — |
+| Environment variables | None are read. `.env.example` documents this and the rule for `VITE_` variables (public, never secrets). | `.env.example` |
 | Secrets in the bundle | None. The audit scanned `src/`, `public/`, `index.html`, `vite.config.ts` and the production `dist/` output for keys, tokens, passwords and connection strings, and found none. | — |
 
 Route guards (`RequireAuth` in `src/app/router.tsx`) only decide what the UI

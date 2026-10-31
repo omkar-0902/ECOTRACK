@@ -25,7 +25,7 @@ in a browser, October 2026), translated to EcoTrack's product and content:
 | Alternating text / product-visual rows | Features page rows, reversed on every second row |
 | 56 px green CTA, uppercase; outline secondary | `Button size="xl"`; `outline` on light, `light` (white outline) on night |
 | White cards on gray-50, 8 px radius, soft shadow, icon in a pale green circle | Problem cards, step cards, KPI cards, console panels |
-| Dark closing band with centered CTA, white multi-column footer | `CtaBand`, `PublicFooter` with a night legal strip |
+| Dark closing band with centered CTA, multi-column footer | one end-of-page call to action per page; night footer with a legal strip |
 
 Not adopted: the reference's white-on-`#48b340` buttons (2.69 : 1, fails WCAG
 AA), its customer logos, certifications and claims, and any of its copy or
@@ -133,10 +133,10 @@ and changing numbers use `tabular`.
 
 ## Layout
 
-- **Public site** (`PublicLayout`, `Sections.tsx`): night header → page →
-  white footer with a night legal strip. Every page opens with a night hero whose
-  content fits the first viewport at 1280×720 and up, then alternates white and
-  muted sections and closes with a `CtaBand` (Preview closes on its notes).
+- **Public site** (`PublicLayout`, `features/public/site/`): theme-aware header
+  → page → night footer. Every page opens with a hero whose content fits the
+  first viewport at 1280×720 and up, then varies its sections and ends on one
+  call to action (see Calls to action).
   Each page has its own composition:
   - Overview: split hero with the real dashboard on a laptop and roster on a phone;
     problem cards; modules beside the workflow; CTA.
@@ -178,7 +178,8 @@ and changing numbers use `tabular`.
 | `Button` / `ButtonLink` | variants `primary`, `outline`, `secondary`, `ghost`, `light` (on night), `danger`; sizes 32 / 40 / 48 / 56 (`xl`, uppercase, public CTAs). `trailingIcon` puts the icon after the label. Use `ButtonLink` for navigation. `cn` doesn't merge conflicting classes, so don't override display or size classes. |
 | `IconButton` | requires `label`; variants `ghost`, `secondary`, `night` |
 | `Brand` | `tone="night"` for white ECO on dark surfaces |
-| `Kicker`, `Eyebrow`, `SectionHeading`, `Section`, `NightBand`, `CtaBand`, `Container`, `ContourLines` | `features/public/Sections.tsx` |
+| `Container`, `Eyebrow`, `StatusPill`, `PageHead` | `features/public/site/ui.tsx` (public site only) |
+| `ContourLines` | `features/auth/ContourLines.tsx`, behind the sign-in panel |
 | `TextField`, `SelectField`, `SearchInput` | labels, errors via `aria-describedby`, `role="alert"` |
 | `StatusBadge`, `LogStatusBadge`, `UnitStatusBadge` | 4 px radius, dot + label |
 | `DemoTag` | dashed tag; `tone="night"` in the top bar and drawer |

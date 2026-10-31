@@ -1,0 +1,70 @@
+/*
+ * Map styles: Leaflet's stylesheet plus EcoTrack's overrides and unit markers.
+ * Imported by UnitMap.tsx, so it loads only with the screens that show a map,
+ * and always after Leaflet's own rules so the overrides win.
+ */
+@import 'leaflet/dist/leaflet.css';
+
+.leaflet-container {
+  background: var(--et-map-bg);
+  font-family: var(--font-sans);
+  color: var(--et-ink);
+  outline: none;
+}
+.leaflet-container:focus-visible {
+  outline: 2px solid var(--et-focus);
+  outline-offset: -2px;
+}
+[data-theme='dark'] .leaflet-tile-pane {
+  filter: invert(1) grayscale(1) brightness(0.78) contrast(0.92);
+}
+[data-theme='light'] .leaflet-tile-pane {
+  filter: grayscale(0.55) contrast(0.96) brightness(1.02);
+}
+.leaflet-control-zoom.leaflet-bar {
+  border: 1px solid var(--et-line-strong);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--et-shadow-2);
+}
+.leaflet-control-zoom a {
+  width: 34px !important;
+  height: 34px !important;
+  line-height: 32px !important;
+  background: var(--et-panel) !important;
+  color: var(--et-ink) !important;
+  border-bottom-color: var(--et-line) !important;
+}
+.leaflet-control-zoom a:hover {
+  background: var(--et-hover) !important;
+}
+.leaflet-control-attribution {
+  background: color-mix(in srgb, var(--et-panel) 82%, transparent) !important;
+  color: var(--et-ink-3) !important;
+  font-size: 10px;
+}
+.leaflet-control-attribution a {
+  color: var(--et-ink-2) !important;
+}
+
+/* Collector unit marker: online units carry the accent; offline units are neutral */
+.et-unit {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  background: var(--et-panel);
+  border: 1.5px solid var(--et-line-strong);
+  color: var(--et-ink-3);
+  box-shadow: var(--et-shadow-2);
+}
+.et-unit--online {
+  border-color: var(--et-accent);
+  background: var(--et-accent);
+  color: var(--et-accent-ink);
+}
+.et-unit--selected {
+  box-shadow: 0 0 0 3px var(--et-panel), 0 0 0 5px var(--et-ink), var(--et-shadow-2);
+}
+
